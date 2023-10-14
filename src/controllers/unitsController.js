@@ -51,3 +51,21 @@ exports.deleteUnit = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+// Controller for GET /units/:id
+exports.getUnitsById = async (req, res) => {
+    const unitId = req.params.id;
+
+    try {
+        const unit = await Unit.findById(unitId);
+
+        if (!unit) {
+            return res.status(404).json({ message: 'Unit not found' });
+        }
+
+        res.status(200).json(unit);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};

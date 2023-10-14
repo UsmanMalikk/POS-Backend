@@ -7,8 +7,18 @@ exports.createStockAdjustment = async (req, res) => {
     const adjustmentData = req.body;
 
     try {
-        const newAdjustment = await StockAdjustment.create(adjustmentData);
-        res.status(201).json({ message: 'Stock adjustment added successfully', adjustment: newAdjustment });
+        let totalAmount = 0
+        // console.log(saleData.invoiceNumber)
+        adjustmentData.inputData.forEach((item) => {
+            totalAmount += item.subtotal;
+        });
+
+        const newAdjustment = new StockAdjustment({
+            totalAmount: totalAmount,
+            ...adjustmentData
+        });
+        const adjSaved = await newAdjustment.save();
+        res.status(201).json({ message: 'Stock adjustment added successfully', adjustment: adjSaved });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });

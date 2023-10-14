@@ -7,8 +7,19 @@ exports.createStockTransfer = async (req, res) => {
     const transferData = req.body;
 
     try {
-        const newTransfer = await StockTransfer.create(transferData);
-        res.status(201).json({ message: 'Stock transfer added successfully', transfer: newTransfer });
+        let totalAmount = 0
+        // console.log(saleData.invoiceNumber)
+        transferData.inputData.forEach((item) => {
+            totalAmount += item.subtotal;
+        });
+
+        const newTransfer = new StockTransfer({
+            totalAmount: totalAmount,
+            ...transferData
+        });
+        const transferSaved = await newTransfer.save();
+        // const newTransfer = await StockTransfer.create(transferData);
+        res.status(201).json({ message: 'Stock transfer added successfully', transfer: transferSaved });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });

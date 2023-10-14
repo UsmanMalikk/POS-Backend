@@ -15,4 +15,7 @@ router.put('/:id', brandsController.updateBrand);
 // DELETE /brands/:id
 router.delete('/:id', brandsController.deleteBrand);
 
+// Get /brandsbyid
+router.get('/:id', brandsController.getBrandsById);
+
 module.exports = router;

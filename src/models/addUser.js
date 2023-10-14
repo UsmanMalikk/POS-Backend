@@ -31,8 +31,8 @@ const addUserSchema = new mongoose.Schema({
     userName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    cpassword: { type: String, required: true },
-    allowLogin: {type: Boolean, required: true},
+    cPassword: { type: String, required: true },
+    allowLogin: {type: Boolean, default: true},
     
     
     
@@ -40,12 +40,12 @@ const addUserSchema = new mongoose.Schema({
     role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role' }, // Reference to the Role collection
 
 
-    allLocations: {type: Boolean, required: true},
-    eziline: {type: Boolean, required: true},
+    // allLocations: {type: Boolean },
+    // eziline: {type: Boolean },
 
 
-    salescommissionpercentage: { type: String, required: true },
-    maxsalesdiscountpercent: { type: String, required: true },
+    // salesCommissionPercentage: { type: String },
+    // maxSaleDiscountPercentage: { type: String },
     
     
     // allowselectedcontacts: {type: Boolean, required: true},
@@ -53,29 +53,31 @@ const addUserSchema = new mongoose.Schema({
 
     dateOfBirth: { type: Date, default: Date.now},
     gender: { type: String, required: true },
-    maritalstatus: { type: String, required: true },
-    bloodgroup: { type: String, required: true },
-    mobilenumber: { type: Number, required: true },
-    altmobilenumber: { type: Number, required: true },
-    famcontactnumber: { type: Number, required: true },
-    facebook: { type: String },
-    twitter: { type: String },
+    maritalStatus: { type: String },
+    bloodGroup: { type: String },
+    mobileNumber: { type: Number, required: true },
+    alternateContactNumber: { type: Number },
+    familyContactNumber: { type: Number },
+    facebookLink: { type: String },
+    twitterLink: { type: String },
 
 
     //6 fields like customerfield 1,2,3,4 and social media 1,2
 
-    idname: { type: String, required: true },
-    address: { type: String },
-    curraddress: { type: String },
+    idProofName: { type: String },
+    idProofNumber: { type: Number },
+
+    permanentAddress: { type: String },
+    currentAddress: { type: String },
 
     //Bank details
 
-    accholdername: { type: String, required: true },
-    accnumber: { type: Number, required: true },
-    bankname: { type: String, required: true },
-    bankidcode: { type: Number, required: true },
+    accountHolderName: { type: String, required: true },
+    accountNumber: { type: Number, required: true },
+    bankName: { type: String, required: true },
+    bankIdentifierCode: { type: Number, required: true },
     branch: { type: String, required: true },
-    taxpayerid: { type: Number, required: true },
+    taxPayerId: { type: Number, required: true },
 
     //HRM and Payroll
 

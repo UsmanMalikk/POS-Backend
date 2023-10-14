@@ -51,3 +51,20 @@ exports.deleteVariation = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+exports.getVariationById = async (req, res) => {
+    const variationId = req.params.id;
+
+    try {
+        const variation = await Variation.findById(variationId);
+
+        if (!variation) {
+            return res.status(404).json({ message: 'Variation not found' });
+        }
+
+        res.status(200).json(variation);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};

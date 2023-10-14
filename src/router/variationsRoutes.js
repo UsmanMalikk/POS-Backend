@@ -15,4 +15,7 @@ router.put('/:id', variationsController.updateVariation);
 // DELETE /variations/:id
 router.delete('/:id', variationsController.deleteVariation);
 
+// Get /variationbyid
+router.get('/:id', variationsController.getVariationById);
+
 module.exports = router;

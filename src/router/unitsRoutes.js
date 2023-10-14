@@ -15,4 +15,7 @@ router.put('/:id', unitsController.updateUnit);
 // DELETE /units/:id
 router.delete('/:id', unitsController.deleteUnit);
 
+// Get /userbyid
+router.get('/:id', unitsController.getUnitsById);
+
 module.exports = router;

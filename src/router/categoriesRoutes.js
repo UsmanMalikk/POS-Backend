@@ -15,4 +15,7 @@ router.put('/:id', categoriesController.updateCategory);
 // DELETE /categories/:id
 router.delete('/:id', categoriesController.deleteCategory);
 
+// Get /categorybyid
+router.get('/:id', categoriesController.getCategoryById);
+
 module.exports = router;

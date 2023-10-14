@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const adminSchema = new mongoose.Schema({
 
-    name: { type: String, required: true },
+    businessName: { type: String, required: true },
     startDate: { type: Date, required: true, default: Date.now},
     currency: { type: String, required: true },
     logo: { type: String },
@@ -22,7 +22,7 @@ const adminSchema = new mongoose.Schema({
     tax2Name: { type: String },
     tax2No: { type: Number },
     financialYearStartMonth: { type: String },
-    stockAccountingMethod: { type: String, enum: ['FIFO', 'LIFO'] },
+    stockAccountingMethod: { type: String, enum: ['First in First Out', 'Last in First Out'] },
 
 
     prefix: { type: String },

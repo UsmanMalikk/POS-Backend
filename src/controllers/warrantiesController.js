@@ -5,6 +5,7 @@ const Warranty = require('../models/warranty');
 exports.getAllWarranties = async (req, res) => {
     try {
         const warranties = await Warranty.find();
+        // console.log(warranties)
         res.status(200).json(warranties);
     } catch (error) {
         console.error(error);
@@ -46,6 +47,24 @@ exports.deleteWarranty = async (req, res) => {
     try {
         await Warranty.findByIdAndDelete(warrantyId);
         res.status(200).json({ message: 'Warranty deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+// Controller for GET /units/:id
+exports.getWarrantyById = async (req, res) => {
+    const warrantyId = req.params.id;
+
+    try {
+        const warranty = await Warranty.findById(warrantyId);
+
+        if (!warranty) {
+            return res.status(404).json({ message: 'warranty not found' });
+        }
+
+        res.status(200).json(warranty);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
