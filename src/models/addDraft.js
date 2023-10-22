@@ -32,6 +32,7 @@ const draftSchema = new mongoose.Schema({
         }],
 
         totalSaleAmount:{ type: Number },
+        byPos: { type: Boolean },
 
     // total:unitPrice*quantity,
     // percent: (discount/100)*total,

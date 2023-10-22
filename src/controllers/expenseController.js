@@ -73,7 +73,7 @@ exports.getExpenseById = async (req, res) => {
 // Controller for GET /add-expenses
 exports.getAllExpenses = async (req, res) => {
     try {
-        const expenses = await Expense.find();
+        const expenses = await Expense.find().populate('expenseCategory','categoryName').populate('subCategory','categoryName').populate('expenseFor','firstName lastName');
         res.status(200).json(expenses);
     } catch (error) {
         console.error(error);

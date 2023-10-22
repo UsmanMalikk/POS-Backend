@@ -4,7 +4,7 @@ const User = require('../models/addUser');
 // Get all users
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().populate('role', 'name'); // Populate the 'role' field with role names
+        const users = await User.find().populate('role', 'roleName'); // Populate the 'role' field with role names
         res.status(200).json(users);
     } catch (error) {
         console.error(error);
@@ -57,7 +57,7 @@ exports.getUserById = async (req, res) => {
     const userId = req.params.id;
 
     try {
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate('role','name');
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });

@@ -73,8 +73,15 @@ exports.getAccountById = async (req, res) => {
 // Controller for GET /add-accounts
 exports.getAllAccounts = async (req, res) => {
     try {
-        const accounts = await Account.find();
-        res.status(200).json(accounts);
+        const accounts = await Account.find({$or: [{ isClosed: false }, { isClosed: { $exists: false } }]})
+            .populate({
+                path: 'accountType',
+                select: 'name parentAccountType',
+                populate: {
+                    path: 'parentAccountType',
+                    select: 'name'
+                }
+            }); res.status(200).json(accounts);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });

@@ -3,11 +3,12 @@ const Sale = require('../models/addSale');
 const Invoice = require('../models/invoice');
 const Quotation = require('../models/addQuotations');
 const Draft = require('../models/addDraft');
+const Account = require('../models/addAccount');
 
 async function generateInvoiceNumber() {
-    const invoice = await Invoice.findOne({ setAsDefault: true }); // Assuming you have only one document for invoices
+    const invoice = await Invoice.findOne({ setAsDefault: true });
     let currentInvoiceNumber = invoice.currentInvoiceNumber;
-    let prefix= invoice.namePrefix;
+    let prefix = invoice.namePrefix;
     let numberOfDigits = invoice.numberOfDigits
     let startFrom = invoice.startFrom
     // Use the specified starting number if provided
@@ -19,7 +20,7 @@ async function generateInvoiceNumber() {
     currentInvoiceNumber++;
 
     // Update the currentInvoiceNumber in the database
-    await Invoice.findOneAndUpdate({setAsDefault: true}, { currentInvoiceNumber });
+    await Invoice.findOneAndUpdate({ setAsDefault: true }, { currentInvoiceNumber });
 
     // Generate the formatted invoice number
     if (prefix === '') {
@@ -34,22 +35,22 @@ async function generateInvoiceNumber() {
 // Get all sales
 exports.getAllSales = async (req, res) => {
     const saleType = req.params.type;
-    try{
-        if(saleType === 'draft'){
+    try {
+        if (saleType === 'draft') {
 
             const drafts = await Draft.find();
             res.status(200).json(drafts);
         }
-        else if(saleType === 'quotations'){
+        else if (saleType === 'quotations') {
             const quotations = await Quotation.find();
             res.status(200).json(quotations);
         }
         else {
-            const sales = await Sale.find();
+            const sales = await Sale.find().populate('deliveryPerson', 'firstName');
             res.status(200).json(sales);
         }
     }
-    
+
     catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -63,42 +64,96 @@ exports.createSale = async (req, res) => {
     const saleType = req.params.type;
 
     try {
-        if(saleType === 'draft'){
-            const newDraft = await Draft.create(saleData);
-            res.status(201).json({ message: 'Draft added successfully', draft: newDraft });
-        }
-        else if(saleType === 'quotations'){
-            const newQuotation = await Quotation.create(saleData);
-            res.status(201).json({ message: 'Quotation added successfully', quotation: newQuotation });
-        }
-        else{
-            // const invoiceScheme = saleData.invoiceScheme;
-            // const invoicePrefix = invoiceScheme.namePrefix;
-            // const startFrom = invoiceScheme.startFrom; // Get the starting number from the sale data
-            // const numberOfDigits = invoiceScheme.numberOfDigits; // Get the number of digits from the sale data
-            if(saleData.invoiceNumber === ""){
+        if (saleType === 'draft' || saleData.status === 'Draft') {
+            if (saleData.invoiceNumber === "") {
                 const generatedInvoiceNumber = await generateInvoiceNumber();
                 saleData.invoiceNumber = generatedInvoiceNumber;
 
             }
-    
+
             // Add the generated invoice number to the sale data
-            let totalSaleAmount=0
+            let totalSaleAmount = 0
             // console.log(saleData.invoiceNumber)
             saleData.inputData.forEach((item) => {
                 totalSaleAmount += item.subtotal;
-              });
+            });
+
+            const newDraft = new Draft({
+                totalSaleAmount: totalSaleAmount,
+                ...saleData
+            });
+            const draftSaved = await newDraft.save();
+            // const newSale = await Sale.create(saleData);
+            // console.log(newSale)
+            res.status(201).json({ message: 'Draft added successfully', draft: draftSaved });
+        }
+        else if (saleType === 'quotations' || saleData.status === 'Quotation') {
+
+            if (saleData.invoiceNumber === "") {
+                const generatedInvoiceNumber = await generateInvoiceNumber();
+                saleData.invoiceNumber = generatedInvoiceNumber;
+
+            }
+
+            // Add the generated invoice number to the sale data
+            let totalSaleAmount = 0
+            // console.log(saleData.invoiceNumber)
+            saleData.inputData.forEach((item) => {
+                totalSaleAmount += item.subtotal;
+            });
+
+            const newQuotation = new Quotation({
+                totalSaleAmount: totalSaleAmount,
+                ...saleData
+            });
+            const quotationSaved = await newQuotation.save();
+            // const newSale = await Sale.create(saleData);
+            // console.log(newSale)
+            res.status(201).json({ message: 'Quotation added successfully', quotation: quotationSaved });
+        }
+        else {
+            // const invoiceScheme = saleData.invoiceScheme;
+            // const invoicePrefix = invoiceScheme.namePrefix;
+            // const startFrom = invoiceScheme.startFrom; // Get the starting number from the sale data
+            // const numberOfDigits = invoiceScheme.numberOfDigits; // Get the number of digits from the sale data
+            if(saleData.paymentAccount){
+                const paymentAccount = await Account.findOne({ _id: saleData.paymentAccount });
+
+                if (!paymentAccount) {
+                    return res.status(400).json({ message: 'Payment account not found' });
+                }
+    
+                // Subtract the sale amount from the account's opening balance
+                paymentAccount.openingBalance -= saleData.amount;
+    
+                // Save the updated account back to the AddAccount schema
+                await paymentAccount.save();
+            }
+            
+
+            if (saleData.invoiceNumber === "") {
+                const generatedInvoiceNumber = await generateInvoiceNumber();
+                saleData.invoiceNumber = generatedInvoiceNumber;
+
+            }
+
+            // Add the generated invoice number to the sale data
+            let totalSaleAmount = 0
+            // console.log(saleData.invoiceNumber)
+            saleData.inputData.forEach((item) => {
+                totalSaleAmount += item.subtotal;
+            });
 
             const newSale = new Sale({
                 totalSaleAmount: totalSaleAmount,
                 ...saleData
-              });
-              const saleSaved = await newSale.save();
+            });
+            const saleSaved = await newSale.save();
             // const newSale = await Sale.create(saleData);
             // console.log(newSale)
             res.status(201).json({ message: 'Sale added successfully', sale: saleSaved });
         }
-        
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -121,39 +176,39 @@ exports.getSaleById = async (req, res) => {
     const saleId = req.params.id;
     const saleType = req.params.type;
 
-        
+
 
     try {
-        if(saleType === 'draft'){
+        if (saleType === 'draft') {
             const draft = await Draft.findById(saleId);
 
             if (!draft) {
                 return res.status(404).json({ message: 'Draft not found' });
             }
-    
+
             res.status(200).json(draft);
         }
 
-        else if(saleType === 'quotations'){
+        else if (saleType === 'quotations') {
             const quotation = await Quotation.findById(saleId);
 
             if (!quotation) {
                 return res.status(404).json({ message: 'Quotation not found' });
             }
-    
+
             res.status(200).json(quotation);
         }
 
-        else{
-            const sale = await Sale.findById(saleId);
+        else {
+            const sale = await Sale.findById(saleId).populate('inputData.product','productName').populate('sellingPrice','name');
 
             if (!sale) {
                 return res.status(404).json({ message: 'Sale not found' });
             }
-    
+
             res.status(200).json(sale);
         }
-        
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -166,26 +221,26 @@ exports.updateSale = async (req, res) => {
     const saleData = req.body;
     const saleType = req.params.type;
 
-        
+
 
     try {
-        if(saleType === 'draft'){
+        if (saleType === 'draft') {
             const updatedDraft = await Draft.findByIdAndUpdate(saleId, saleData, { new: true });
 
             if (!updatedDraft) {
                 return res.status(404).json({ message: 'Draft not found' });
             }
-    
+
             res.status(200).json({ message: 'Draft updated successfully', draft: updatedDraft });
         }
 
-        else if(saleType === 'quotations'){
+        else if (saleType === 'quotations') {
             const updatedQuotation = await Quotation.findByIdAndUpdate(saleId, saleData, { new: true });
 
             if (!updatedQuotation) {
                 return res.status(404).json({ message: 'Quotation not found' });
             }
-    
+
             res.status(200).json({ message: 'Quotation updated successfully', quotation: updatedQuotation });
         }
 
@@ -195,10 +250,10 @@ exports.updateSale = async (req, res) => {
             if (!updatedSale) {
                 return res.status(404).json({ message: 'Sale not found' });
             }
-    
+
             res.status(200).json({ message: 'Sale updated successfully', sale: updatedSale });
         }
-        
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -211,36 +266,36 @@ exports.deleteSale = async (req, res) => {
     const saleId = req.params.id;
 
     try {
-        if(saleType === 'draft'){
+        if (saleType === 'draft') {
             const deletedDraft = await Draft.findByIdAndDelete(saleId);
 
             if (!deletedDraft) {
                 return res.status(404).json({ message: 'Draft not found' });
             }
-    
+
             res.status(200).json({ message: 'Draft deleted successfully' });
         }
-    
-        else if(saleType === 'quotations'){
+
+        else if (saleType === 'quotations') {
             const deletedQuotation = await Quotation.findByIdAndDelete(saleId);
 
             if (!deletedQuotation) {
                 return res.status(404).json({ message: 'Quotation not found' });
             }
-    
+
             res.status(200).json({ message: 'Quotation deleted successfully' });
         }
-    
+
         else {
             const deletedSale = await Sale.findByIdAndDelete(saleId);
 
             if (!deletedSale) {
                 return res.status(404).json({ message: 'Sale not found' });
             }
-    
+
             res.status(200).json({ message: 'Sale deleted successfully' });
         }
-        
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });

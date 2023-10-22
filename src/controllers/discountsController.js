@@ -72,7 +72,7 @@ exports.getDiscountById = async (req, res) => {
 // Get all discounts
 exports.getAllDiscounts = async (req, res) => {
     try {
-        const discounts = await Discount.find();
+        const discounts = await Discount.find().populate('brand','brandName').populate('category','categoryName').populate('products','productName');
         res.status(200).json(discounts);
     } catch (error) {
         console.error(error);

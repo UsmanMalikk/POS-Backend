@@ -67,12 +67,11 @@ exports.getStockAdjustmentById = async (req, res) => {
     const adjustmentId = req.params.id;
 
     try {
-        const adjustment = await StockAdjustment.findById(adjustmentId);
+        const adjustment = await StockAdjustment.findById(adjustmentId).populate('inputData.product','productName');
 
         if (!adjustment) {
             return res.status(404).json({ message: 'Stock adjustment not found' });
         }
-
         res.status(200).json(adjustment);
     } catch (error) {
         console.error(error);

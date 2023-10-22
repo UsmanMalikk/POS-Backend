@@ -53,6 +53,16 @@ exports.deleteExpenseCategory = async (req, res) => {
 };
 
 // Controller for GET /expense-categories
+exports.getAllExpenseCategoriesWithoutSub = async (req, res) => {
+    try {
+        const categories = await ExpenseCategory.find({ isSubCategory: { $eq: false }} );
+        res.status(200).json(categories);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 exports.getAllExpenseCategories = async (req, res) => {
     try {
         const categories = await ExpenseCategory.find();
@@ -62,3 +72,29 @@ exports.getAllExpenseCategories = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+// Controller for GET /add-expenses/:id
+exports.getExpenseCategoryById = async (req, res) => {
+    const expenseId = req.params.id;
+
+    try {
+        const expenseCategory = await ExpenseCategory.findById(expenseId);
+
+        if (!expenseCategory) {
+            return res.status(404).json({ message: 'Expense Category not found' });
+        }
+
+        res.status(200).json(expenseCategory);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+exports.getCategoriesWithNonEmptyParent = async (req, res) => {
+    try {
+      const categories = await ExpenseCategory.find({ isSubCategory: { $ne: false }}).populate('parentCategory','categoryName'); // Use $ne (not equal) query operator
+      res.status(200).json(categories);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  };

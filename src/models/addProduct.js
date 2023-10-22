@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   productName: { type: String, required: true },
-  sku: { type: String, unique: true },
+  sku: { type: Number, unique: true },
   barcodeType: { type: String },
   unit: { type: mongoose.Schema.Types.ObjectId, ref: 'Unit' },
   //   unit: { type: String},
@@ -17,8 +17,8 @@ const productSchema = new mongoose.Schema({
 
   //Opening Stock
   openingStock: [{
-    quantityRemaining: { type: Number, default: 0.00 },
-    unitCostBfrTx: { type: Number, default: 0.00 },
+    quantityRemaining: { type: Number, default: 0 },
+    unitCostBfrTx: { type: Number, default: 0 },
     lotNumber: { type: Number },
     date: { type: Date },
     note: { type: String }
@@ -32,7 +32,8 @@ const productSchema = new mongoose.Schema({
 
   variationType: [{
     variationTempleateID: {
-      type: mongoose.Schema.Types.ObjectId, ref: 'Variation'
+      type: mongoose.Schema.Types.ObjectId, ref: 'Variation',
+      default: null,
     },
     variation: [{
       subSKU: { type: Number },
@@ -46,12 +47,13 @@ const productSchema = new mongoose.Schema({
   netTotal: { type: Number },
 
   sellingPriceGroups: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'SellingPriceGroup',
-    value: { type: Number }
+    spg: {type: mongoose.Schema.Types.ObjectId, ref: 'SellingPriceGroup'},
+    value: { type: Number },
+    discountType: {type:String}
   }],
-  // category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
-  brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' , default: null},
+  brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' , default: null},
+  subCategory:{type:String}
   // warranty: { type: mongoose.Schema.Types.ObjectId, ref: 'Warranty' }
 });
 

@@ -11,11 +11,11 @@ const posSchema = new mongoose.Schema({
     //shipping add
     payTerm: { type: String },
     salesDate: { type: Date, default: Date.now },
-    status: { type: String, required: true },
+    status: { type: String },
     // invoiceSchema: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },//from invoice schema
     invoiceNumber: { type: String },
 
-
+    byPos: { type: Boolean, default: true },
 
     // orderStatus:{type: String, default: "Received"},  was for kitchen tab
     //Attach doc
@@ -25,9 +25,12 @@ const posSchema = new mongoose.Schema({
     inputData: [
         {
             product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            productName: {type: String},
             quantity: { type: Number, default: 0 },
             unitPrice: { type: Number, default: 0.00 },
-            discount: { type: Number, default: 0.00 },
+            discountType: { type: String },
+            discountAmount: { type: Number, default: 0.00 },
+            description: { type: String },
             subtotal: { type: Number }
         }],
 
@@ -49,7 +52,7 @@ const posSchema = new mongoose.Schema({
 
     shippingDetails: { type: String },
     shippingAddress: { type: String },
-    shippingCharges: { type: Number, default: 0.00 },
+    shippingCharges: { type: Number },
     shippingStatus: { type: String },
     deliveredTo: { type: String },
 
@@ -68,11 +71,22 @@ const posSchema = new mongoose.Schema({
     amount: { type: Number },
     paymentDate: { type: Date, default: Date.now },
     paymentMethod: { type: String },
-    // paymentAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'PaymentAccount' },
+    paymentAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' },
     paymentNote: { type: String },
 
+
+
+    cardNumber:{ type: Number },
+    holderName:{ type: String },
+    transactionNumber:{ type: Number },
+    cardType:{ type: String },
+    month:{ type: Number },
+    year:{ type: Number },
+    securityCode:{ type: Number },
+
+
     //For suspended sales
-    suspended: { type: Boolean },
+    suspendNote: { type: String },
 
 
 });

@@ -24,9 +24,10 @@ const variationsRoutes = require('./router/variationsRoutes');
 const warrantiesRoutes = require('./router/warrantiesRoutes');
 const salesRoutes = require('./router/salesRoutes');
 const posRoutes = require('./router/posRoutes');
+const financialRoutes = require('./router/financialRoutes');
 
-const draftsRoutes = require('./router/draftsRoutes');
-const quotationsRoutes = require('./router/quotationsRoutes');
+// const draftsRoutes = require('./router/draftsRoutes');
+// const quotationsRoutes = require('./router/quotationsRoutes');
 const discountsRoutes = require('./router/discountsRoutes');
 const sellingPriceGroupRoutes = require('./router/sellingPriceGroupRoutes');
 
@@ -35,6 +36,8 @@ const stockAdjustmentRoutes = require('./router/stockAdjustmentRoutes');
 const expenseRoutes = require('./router/expenseRoutes');
 const expenseCategoryRoutes = require('./router/expenseCategoryRoutes');
 const accountRoutes = require('./router/accountRoutes');
+const accountTypeRoutes = require('./router/accountTypeRoutes');
+
 const businessLocationRoutes = require('./router/businessLocationRoutes');
 // My routes
 const contact_routes= require("./router/Contact")
@@ -76,8 +79,8 @@ app.use('/admin/warranties', warrantiesRoutes);
 app.use('/admin/sales', salesRoutes);
 app.use('/admin/pos', posRoutes);
 
-app.use('/admin/drafts', draftsRoutes);
-app.use('/admin/quotations', quotationsRoutes);
+// app.use('/admin/drafts', draftsRoutes);
+// app.use('/admin/quotations', quotationsRoutes);
 app.use('/admin/discounts', discountsRoutes);
 app.use('/admin/stock-transfers', stockTransferRoutes);
 
@@ -85,7 +88,9 @@ app.use('/admin/stock-adjustment', stockAdjustmentRoutes);
 app.use('/admin/add-expenses', expenseRoutes);
 app.use('/admin/expense-categories', expenseCategoryRoutes);
 app.use('/admin/add-accounts', accountRoutes);
+app.use('/admin/accounttypes', accountTypeRoutes);
 app.use('/admin/invoices', invoiceRoutes);
+app.use('/admin/account', financialRoutes);
 
 // MY routes
 app.use("/admin", contact_routes);
@@ -97,6 +102,7 @@ app.use("/admin",recipe_s);
 app.use("/admin",production_m);
 // app.use('/finance', financialRoutes);
 // app.use('/admin/kitchen', kitchenRoutes);
+
 
 
 app.use('/admin/business-locations', businessLocationRoutes);

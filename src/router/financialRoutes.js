@@ -15,5 +15,11 @@ router.get('/cash-flow', financialController.getCashFlow);
 // GET /payment-account-report
 router.get('/payment-account-report', financialController.getPaymentAccountReport);
 
+// POST /funds-transfer
+router.post('/funds-transfer', financialController.createFundsTransfer);
+
+// POST /funds-deposit
+router.post('/funds-deposit', financialController.createFundsDeposit);
+
 
 module.exports = router;

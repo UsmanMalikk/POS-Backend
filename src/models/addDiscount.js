@@ -2,17 +2,17 @@ const mongoose = require('mongoose');
 
 const discountSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  products: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-  brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+  products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' ,default: null}],
+  brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand',default: null },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category',default: null },
 //   unit: { type: String},
   location: { type: String },
   priority: { type: Number },
   discountType: {type: String},
   discountAmount: {type: Number},
-  startAt: { type: Date},
-  endAt: { type: Date},
-  sellingPriceGrp: { type: mongoose.Schema.Types.ObjectId, ref: 'SellingPriceGroup' },
+  startsAt: { type: Date},
+  endsAt: { type: Date},
+  sellingPriceGrp: { type: mongoose.Schema.Types.ObjectId, ref: 'SellingPriceGroup' ,default: null},
 
   isApplyinCustomerGrps: { type: Boolean, default: false },
   isActive: { type: Boolean, default: false },

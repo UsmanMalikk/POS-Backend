@@ -1,10 +1,36 @@
 // controllers/productsController.js
 const Product = require('../models/addProduct');
+async function generateSku() {
+    const product = await Product.findOne().sort({ sku: -1 });
+    // console.log(product)
+    if (product) {
+      // If a product with SKU exists, increment it by one
+      const latestSku = product.sku;
+      const newSku = latestSku + 1; 
+    // let prefix = invoice.namePrefix;                         ///FromPreffix schema later
+   
 
+    // Generate the formatted invoice number
+    // if (prefix === '') {
+        return newSku;
+    
+    }
+    else {
+        const newSku = 1; 
+        return newSku;
+
+    }
+    // } else {
+    //     // const currentYear = new Date().getFullYear();
+    //     return `${prefix}-${currentInvoiceNumber.toString().padStart(numberOfDigits, '0')}`;
+    // }
+
+    // return null; // Invalid format
+}
 // Get all products
 exports.getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find().populate('sellingPriceGroups','name');
+        const products = await Product.find().populate('sellingPriceGroups','name').populate('unit','name');
         res.status(200).json(products);
     } catch (error) {
         console.error(error);
@@ -15,8 +41,13 @@ exports.getAllProducts = async (req, res) => {
 // Create a new product
 exports.createProduct = async (req, res) => {
     const productData = req.body;
-
+// console.log(productData)
     try {
+        if(productData.sku === 0){
+            const generatedSkuNumber = await generateSku();
+            productData.sku = generatedSkuNumber
+
+        }
         const newProduct = await Product.create(productData);
         res.status(201).json({ message: 'Product added successfully', product: newProduct });
     } catch (error) {
@@ -57,7 +88,7 @@ exports.getProductById = async (req, res) => {
     const productId = req.params.id;
   
     try {
-        const product = await Product.findById(productId);
+        const product = await Product.findById(productId).populate('brand','brandName').populate('category','categoryName').populate('unit','name shortName');
   
         if (!product) {
             return res.status(404).json({ message: 'product not found' });

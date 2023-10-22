@@ -1,21 +1,31 @@
 const mongoose = require('mongoose');
 
 const expenseSchema = new mongoose.Schema({
-  businessLocation: { type: String, required: true },
+  // businessLocation: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation' },
+  businessLocation: { type: String },
+
   expenseCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'ExpenseCategory', required: true },
   subCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'ExpenseCategory' },
-  referenceNumber: { type: String, required: true },
+  invoiceNo: { type: String },
   date: { type: Date, required: true },
-  expenseFor: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  expenseForContact: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: ['Supplier', 'Customer']
-    }
-  ],
+  expenseFor: { type: mongoose.Schema.Types.ObjectId, ref: 'AddUser', required: true },
+  // expenseForContact: {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'Supplier', required: true
+  //   },
+    expenseForContact: {
+      type: String
+    },
   applicableTax: { type: Number },
   totalAmount: { type: Number, required: true },
-  expenseNote: { type: String }
+  expenseNote: { type: String },
+  isRefund: { type: Boolean, default: false },//if yes add it to net profit
+
+  amount: { type: Number },
+  paymentDate: { type: Date, default: Date.now },
+  paymentMethod: { type: String },
+  // paymentAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'PaymentAccount' },
+  paymentNote: { type: String },
 });
 
 const AddExpense = mongoose.model('AddExpense', expenseSchema);

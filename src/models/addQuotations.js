@@ -52,6 +52,7 @@ const quotationSchema = new mongoose.Schema({
     shippingCharges: { type: Number, default: 0.00 },
     shippingStatus: { type: String },
     deliveredTo: { type: String },
+    byPos: { type: Boolean },
 
 
     additionalExpenseName: { type: String },

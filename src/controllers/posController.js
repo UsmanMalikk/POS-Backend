@@ -9,11 +9,11 @@ async function generateInvoiceNumber() {
     let currentInvoiceNumber = invoice.currentInvoiceNumber;
     let prefix= invoice.namePrefix;
     let numberOfDigits = invoice.numberOfDigits
-    let startFrom = invoice.startFrom
+    // let startFrom = invoice.startFrom
     // Use the specified starting number if provided
-    if (startFrom === 0) {
-        currentInvoiceNumber = invoice.startFrom;
-    }
+    // if (startFrom) {
+    //     currentInvoiceNumber = invoice.startFrom;
+    // }
 
     // Increment the invoice number
     currentInvoiceNumber++;
@@ -33,21 +33,21 @@ async function generateInvoiceNumber() {
 }
 // Get all sales
 exports.getAllPosSales = async (req, res) => {
-    const saleType = req.params.type;
+    // const saleType = req.params.type;
     try{
-        if(saleType === 'draft'){
+        // if(saleType === 'draft'){
 
-            const drafts = await Draft.find();
-            res.status(200).json(drafts);
-        }
-        else if(saleType === 'quotations'){
-            const quotations = await Quotation.find();
-            res.status(200).json(quotations);
-        }
-        else {
+        //     const drafts = await Draft.find();
+        //     res.status(200).json(drafts);
+        // }
+        // else if(saleType === 'quotations'){
+        //     const quotations = await Quotation.find();
+        //     res.status(200).json(quotations);
+        // }
+        // else {
             const sales = await Pos.find();
             res.status(200).json(sales);
-        }
+        // }
     }
     
     catch (error) {
@@ -60,14 +60,14 @@ exports.getAllPosSales = async (req, res) => {
 
 exports.createPosSale = async (req, res) => {
     const saleData = req.body;
-    const saleType = req.params.type;
+    // const saleType = req.params.type;
 
     try {
-        if(saleType === 'draft'){
+        if(saleData.status === 'Draft'){
             const newDraft = await Draft.create(saleData);
             res.status(201).json({ message: 'Draft added successfully', draft: newDraft });
         }
-        else if(saleType === 'quotations'){
+        else if(saleData.status === 'Quotation'){
             const newQuotation = await Quotation.create(saleData);
             res.status(201).json({ message: 'Quotation added successfully', quotation: newQuotation });
         }
@@ -76,7 +76,7 @@ exports.createPosSale = async (req, res) => {
             // const invoicePrefix = invoiceScheme.namePrefix;
             // const startFrom = invoiceScheme.startFrom; // Get the starting number from the sale data
             // const numberOfDigits = invoiceScheme.numberOfDigits; // Get the number of digits from the sale data
-            if(saleData.invoiceNumber === ""){
+            if(saleData.invoiceNumber === "" && saleData.status != 'Suspended'){
                 const generatedInvoiceNumber = await generateInvoiceNumber();
                 saleData.invoiceNumber = generatedInvoiceNumber;
 
@@ -119,32 +119,32 @@ exports.createPosSale = async (req, res) => {
 // Get a sale by ID
 exports.getPosSaleById = async (req, res) => {
     const saleId = req.params.id;
-    const saleType = req.params.type;
+    // const saleType = req.params.type;
 
         
 
     try {
-        if(saleType === 'draft'){
-            const draft = await Draft.findById(saleId);
+        // if(saleType === 'draft'){
+        //     const draft = await Draft.findById(saleId);
 
-            if (!draft) {
-                return res.status(404).json({ message: 'Draft not found' });
-            }
+        //     if (!draft) {
+        //         return res.status(404).json({ message: 'Draft not found' });
+        //     }
     
-            res.status(200).json(draft);
-        }
+        //     res.status(200).json(draft);
+        // }
 
-        else if(saleType === 'quotations'){
-            const quotation = await Quotation.findById(saleId);
+        // else if(saleType === 'quotations'){
+        //     const quotation = await Quotation.findById(saleId);
 
-            if (!quotation) {
-                return res.status(404).json({ message: 'Quotation not found' });
-            }
+        //     if (!quotation) {
+        //         return res.status(404).json({ message: 'Quotation not found' });
+        //     }
     
-            res.status(200).json(quotation);
-        }
+        //     res.status(200).json(quotation);
+        // }
 
-        else{
+        // else{
             const sale = await Pos.findById(saleId);
 
             if (!sale) {
@@ -152,7 +152,7 @@ exports.getPosSaleById = async (req, res) => {
             }
     
             res.status(200).json(sale);
-        }
+        // }
         
     } catch (error) {
         console.error(error);
@@ -262,3 +262,14 @@ exports.salePosShipment = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+//Suspended sales
+exports.getSuspendedSales = async (req, res) => {
+    try {
+      // Use the Sale model to find all sales with the status "Suspended"
+      const suspendedSales = await Pos.find({ status: 'Suspended' });
+  
+      res.json(suspendedSales);
+    } catch (error) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };

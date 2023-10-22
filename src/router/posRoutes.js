@@ -4,21 +4,23 @@ const posController = require('../controllers/posController');
 //GET Sales Shipment Status
 router.get('/shipments', posController.salePosShipment);
 
+// Get suspended
+router.get('/suspended', posController.getSuspendedSales);
+
 // GET /sales/all-records
-router.get('/:type', posController.getAllPosSales);
+router.get('/', posController.getAllPosSales);
 
 // POST /sales
-router.post('/:type', posController.createPosSale);
+router.post('/', posController.createPosSale);
 
 // GET /sales/:id
-router.get('/:type/:id', posController.getPosSaleById);
+router.get('/:id', posController.getPosSaleById);
 
 // PUT /sales/:id
-router.put('/:type/:id', posController.updatePosSale);
+router.put('/:id', posController.updatePosSale);
 
 // DELETE /sales/:id
-router.delete('/:type/:id', posController.deletePosSale);
-
+router.delete('/:id', posController.deletePosSale);
 
 
 module.exports = router;

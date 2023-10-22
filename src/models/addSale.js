@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const saleSchema = new mongoose.Schema({
     businesLocation: { type: String },
-    sellingPrice: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    sellingPrice: { type: mongoose.Schema.Types.ObjectId, ref: 'SellingPriceGroup' , default:null},
     // typeofService: { type: String },
     // customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
     customer: { type: String },
@@ -13,7 +13,7 @@ const saleSchema = new mongoose.Schema({
     salesDate: { type: Date, default: Date.now },
     status: { type: String, required: true },
     // invoiceSchema: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },//from invoice schema
-    invoiceNumber: { type: String },
+    invoiceNumber: { type: String, unique: true },
 
 
 
@@ -24,7 +24,7 @@ const saleSchema = new mongoose.Schema({
 
     inputData: [
         {
-            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' , default:null},
             quantity: { type: Number, default: 0 },
             unitPrice: { type: Number, default: 0.00 },
             discount: { type: Number, default: 0.00 },
@@ -49,10 +49,10 @@ const saleSchema = new mongoose.Schema({
 
     shippingDetails: { type: String },
     shippingAddress: { type: String },
-    shippingCharges: { type: Number, default: 0.00 },
+    shippingCharges: { type: Number },
     shippingStatus: { type: String },
     deliveredTo: { type: String },
-
+    deliveryPerson: { type: mongoose.Schema.Types.ObjectId, ref: 'AddUser', default:null },
 
     additionalExpenseName: { type: String },
     additionalExpenseAmount: { type: Number },
@@ -68,10 +68,16 @@ const saleSchema = new mongoose.Schema({
     amount: { type: Number },
     paymentDate: { type: Date, default: Date.now },
     paymentMethod: { type: String },
-    // paymentAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'PaymentAccount' },
+    paymentAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount', default:null },
     paymentNote: { type: String },
 
-
+    cardNumber:{ type: Number },
+    holderName:{ type: String },
+    transactionNumber:{ type: Number },
+    cardType:{ type: String },
+    month:{ type: Number },
+    year:{ type: Number },
+    securityCode:{ type: Number },
 
 });
 
