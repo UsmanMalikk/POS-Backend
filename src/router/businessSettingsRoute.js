@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const businessSettingsController = require('../controllers/businessSettingsController');
+const {checkPermission} = require('../middleware/checkPermission'); 
+const authMiddleware = require('../middleware/authMiddleware'); 
 
-// router.put('/:id', businessLocationController.createLocation);
-router.put('/', businessSettingsController.updateAdmin); //jwttoken //Business and tax: For both same route
+// PUT /businessSettings
+router.put('/',authMiddleware, checkPermission('accessBusinessSettings'), businessSettingsController.updateAdmin);
 
-
+module.exports = router;

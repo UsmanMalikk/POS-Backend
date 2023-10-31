@@ -51,3 +51,20 @@ exports.deleteRole = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+// Controller for GET /role/:id
+exports.getRolesById = async (req, res) => {
+    const roleId = req.params.id;
+
+    try {
+        const role = await Role.findById(roleId);
+
+        if (!role) {
+            return res.status(404).json({ message: 'Role not found' });
+        }
+
+        res.status(200).json(role);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};

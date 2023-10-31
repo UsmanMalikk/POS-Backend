@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const expenseSchema = new mongoose.Schema({
   // businessLocation: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation' },
-  businessLocation: { type: String },
+  businessLocation: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null },
 
   expenseCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'ExpenseCategory', required: true },
   subCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'ExpenseCategory' },

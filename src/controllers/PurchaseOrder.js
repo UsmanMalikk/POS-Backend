@@ -1,6 +1,9 @@
 
 const PurchaseOrder=require("../models/PurchaseOrder");
 const Contact = require('../models/Supplier'); 
+
+
+
 const getAllPurchaseOrder = async (req, res) => {
     try {
         const { businessLocation, supplier, shippingStatus } = req.query;
@@ -20,6 +23,7 @@ const getAllPurchaseOrder = async (req, res) => {
         }
 
         const purchaseOrders = await PurchaseOrder.find(query);
+        
 
         res.status(200).json(purchaseOrders);
     } catch (error) {

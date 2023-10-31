@@ -5,6 +5,7 @@ const sellingPriceGroupSchema = new mongoose.Schema({
   name: { type: String, required: true , unique: true},
   description: { type: String },
   price: { type: Number, default:0 }, // The price associated with this group for the product
+  isDefault: {type: Boolean, default: false}
 });
 
 const SellingPriceGroup = mongoose.model('SellingPriceGroup', sellingPriceGroupSchema);

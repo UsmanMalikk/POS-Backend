@@ -6,7 +6,7 @@ const discountSchema = new mongoose.Schema({
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand',default: null },
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category',default: null },
 //   unit: { type: String},
-  location: { type: String },
+  location: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null },
   priority: { type: Number },
   discountType: {type: String},
   discountAmount: {type: Number},

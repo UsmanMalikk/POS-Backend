@@ -1,76 +1,72 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const purchaseDueSchema=new Schema({
+const purchaseDueSchema = new Schema({
     supplier: {
         type: Schema.Types.ObjectId,
-        ref: 'Contact', 
-        required: true,
+        ref: 'Supplier'
     },
-    ReferenceNo:Number,
-    purchaseStatus:{
-        type: String,
-        enum: ['recieved', 'pending', 'ordered']
-    },
+    referenceNo: { type: String, unique: true ,default:0},
+    // purchaseStatus: {
+    //     type: String,
+    //     required: true
+    // },
     purchaseDate: Date,
-    businessLocation: String,
-    paymentTerm: String,
-    documents: [
-        {
-            documentFilePath: String,
-        },
-    ],
-    purchaseOrder:Number,
-    product:{
-        type:Schema.Types.ObjectId,
-        ref:'Product'
+    businessLocation: {
+        type: Schema.Types.ObjectId,
+        ref: 'BusinessLocation'
     },
-   discountType:{
-    type:String,
-    enum:['percentage','fixed']
-   },
-   discountAmount: Number,
-   purchaseTax:Number,
-   additionalNotes:String,
-   shippingCharges: {
-    type: Number,
-    default: 0.00,
-},
-advanceBalnce:{
-    type:Number,
-    required:true
-},
-paidOn:{
-type:Date,
-required:true
-},
-paymentMethod:{
-    type:String,
-    enum:['advance','cash','card','cheque','Bank transfer','easypaisa','other','custom payment 6'],
-    required:true
-},
-paymentAccount:{
-    type:String
-},
-cardNumber:Number,
-cardHolderNmae:String,
-cardTransactionNo:Number,
-cardType:{
-    type:String,
-    enum:['credit card','visa','debit card','MAster card']
-},
-Month:Number,
-Year:Number,
-securityCode:Number,
-chequeNO:Number,
-bankAccountNo:Number,
-transactionNo:Number,
-paymentNote:String,
+    payTerm: String,
+    status:{type: String},
+    purchaseOrder: Number,
+    inputData: [
+        {
+            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
+            quantity: { type: Number, default: 0 },
+            unitCostBeforeDiscount: { type: Number, default: 0 },
+            discountPercent: { type: Number, default: 0 },
+            unitCostBeforeTax: { type: Number },
+            profitMarginPercentage: { type: Number, default: 0 },
+            unitSellingPrice: { type: Number, default: 0 }
+
+
+
+        }],
+    discountType: {
+        type: String,
+    },
+    totalPurchaseAmount:Number,
+    discountAmount: Number,
+    additionalNotes: String,
+    shippingDetails: { type: String },
+
+    shippingCharges: {
+        type: Number,
+        default: 0,
+    },
+    // advanceBalnce: {
+    //     type: Number,
+
+    // },
+    amount: { type: Number },
+    paymentDate: { type: Date, default: Date.now },
+    paymentMethod: { type: String },
+    paymentAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount', default:null },
+    paymentNote: { type: String },
+
+
+    cardNumber:{ type: Number },
+    holderName:{ type: String },
+    transactionNumber:{ type: Number },
+    cardType:{ type: String },
+    month:{ type: Number },
+    year:{ type: Number },
+    securityCode:{ type: Number },
 
 
 
 });
 
 
-const PurchaseesDue= mongoose.model("PurchasesDue", purchaseDueSchema);
+const PurchaseesDue = mongoose.model("PurchasesDue", purchaseDueSchema);
 module.exports = PurchaseesDue;

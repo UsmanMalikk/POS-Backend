@@ -7,8 +7,8 @@ const stocktransferSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now },
     referenceNumber: { type: Number },
     status: { type: String, required: true },
-    locationsFrom: { type: String },
-    locationsTo: { type: String },
+    fromLocation: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null },
+    toLocation: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null },
 
     inputData: [
         {

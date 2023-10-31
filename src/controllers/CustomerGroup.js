@@ -4,7 +4,7 @@ const getAllCustomerGroups = async (req, res) => {
     
    
     try {
-        const customerGroups = await CustomerGroup.find();
+        const customerGroups = await CustomerGroup.find().populate('sellingPriceGroup','name');
         res.status(200).json(customerGroups);
     } catch (error) {
         console.error('Error fetching customer groups:', error);
@@ -59,4 +59,21 @@ const deleteCustomerGroup = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
-module.exports={getAllCustomerGroups,createCustomerGroup,updateCustomerGroup, deleteCustomerGroup};
+const getCustomerGroupById = async (req, res) => {
+    const groupId = req.params.id;
+
+    try {
+        const fetched = await CustomerGroup.findById(groupId).populate('sellingPriceGroup','name');
+
+        if (!fetched) {
+            return res.status(404).json({ message: 'Discount not found' });
+        }
+
+        res.status(200).json(fetched);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+module.exports={getAllCustomerGroups,createCustomerGroup,updateCustomerGroup, deleteCustomerGroup, getCustomerGroupById};

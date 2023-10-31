@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const stockadjustmentSchema = new mongoose.Schema({
 
-    businesLocation: { type: String },
+    businesLocation: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null },
     referenceNumber: { type: Number},
 
     date: { type: Date, default: Date.now },
@@ -19,7 +19,6 @@ const stockadjustmentSchema = new mongoose.Schema({
             subtotal: { type: Number }
         }],
 
-    totalAmount: { type: Number },
 
     totalamountRecovered:{ type: Number, default: 0 },
     reason:{ type: String },

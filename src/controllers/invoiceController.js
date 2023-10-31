@@ -1,12 +1,16 @@
 const Invoice = require('../models/invoice');
 
 exports.createInvoice = async (req, res) => {
+  const invoiceData = req.body;
   try {
-    const invoice = new Invoice(req.body);
-    await invoice.save();
-    res.status(201).json(invoice);
+    console.log(invoiceData)
+
+    const newInvoice = await Invoice.create(invoiceData);
+    console.log(newInvoice)
+
+    res.status(201).json(newInvoice);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -19,7 +23,7 @@ exports.updateInvoiceById = async (req, res) => {
       if (!updatedInvoice) {
         return res.status(404).json({ message: 'Invoice not found' });
       }
-      res.json(updatedInvoice);
+      res.status(200).json(updatedInvoice);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -33,7 +37,7 @@ exports.deleteInvoiceById = async (req, res) => {
       if (!deletedInvoice) {
         return res.status(404).json({ message: 'Invoice not found' });
       }
-      res.json({ message: 'Invoice deleted successfully' });
+      res.status(200).json({ message: 'Invoice deleted successfully' });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -47,7 +51,7 @@ exports.viewInvoiceById = async (req, res) => {
       if (!invoice) {
         return res.status(404).json({ message: 'Invoice not found' });
       }
-      res.json(invoice);
+      res.status(200).json(invoice);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -57,7 +61,7 @@ exports.viewInvoiceById = async (req, res) => {
 exports.viewAllInvoices = async (req, res) => {
     try {
       const invoices = await Invoice.find();
-      res.json(invoices);
+      res.status(200).json(invoices);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }

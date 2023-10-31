@@ -4,19 +4,37 @@ const Schema = mongoose.Schema;
 const purchaseOrderSchema = new Schema({
     supplier: {
         type: Schema.Types.ObjectId,
-        ref: 'Contact', 
-        required: true,
+        ref: 'Supplier'
     },
-    product:{
-        type:Schema.Types.ObjectId,
-        ref:'Product'
+    product: {
+        type: Schema.Types.ObjectId,
+        ref: 'Product'
     },
-   
-    
+    referenceNo: { type: String, unique: true },
+
     orderDate: Date,
     deliveryDate: Date,
-    businessLocation: String,
+
+    businessLocation: {
+        type: Schema.Types.ObjectId,
+        ref: 'BusinessLocation'
+    },
     paymentTerm: String,
+    inputData: [
+        {
+            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
+            quantity: { type: Number, default: 0 },
+            unitCostBeforeDiscount: { type: Number, default: 0 },
+            discountPercent: { type: Number, default: 0 },
+            unitCostBeforeTax: { type: Number },
+            profitMarginPercentage: { type: Number, default: 0 },
+            unitSellingPrice: { type: Number, default: 0 }
+
+
+
+        }],
+
+
     documents: [
         {
             documentFilePath: String,

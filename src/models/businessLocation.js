@@ -3,57 +3,28 @@ const mongoose = require('mongoose');
 
 const businessLocationSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  locationID: String,
+  locationId: Number,
   landmark: String,
   city: { type: String, required: true },
-  zipCode: { type: Number, required: true },
-  state: { type: String, required: true },
+  zipCode: { type: Number },
+  state: { type: String },
   country: { type: String, required: true },
-  mobileNo: { type: Number, required: true },
+  mobileNo: { type: Number },
   altContactNo: { type: Number },
   email: { type: String },
   website: { type: String },
-  invoiceScheme: { type: mongoose.Schema.Types.ObjectId, ref: 'InvoiceScheme' },
-  defaultSellingPriceGroup: { type: mongoose.Schema.Types.ObjectId, ref: 'SellingPriceGroup' },
-  featuredProduct: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-  
-  cash:[
-    {
-      enabled: { type: Boolean, default: true },
-      defaultAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' },
-    },
-  ],
-  card:[
-    {
-      enabled: { type: Boolean, default: true },
-      defaultAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' },
-    },
-  ],
-  cheque:[
-    {
-      enabled: { type: Boolean, default: true },
-      defaultAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' },
-    },
-  ],
-  bankTransfer:[
-    {
-      enabled: { type: Boolean, default: true },
-      defaultAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' },
-    },
-  ],
-  other:[
-    {
-      enabled: { type: Boolean, default: true },
-      defaultAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' },
-    },
-  ],
-  easyPaisa:[
-    {
-      enabled: { type: Boolean, default: true },
-      defaultAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' },
-    },
-  ],
-});
+  // invoiceScheme: { type: mongoose.Schema.Types.ObjectId, ref: 'InvoiceScheme', default: null },
+  defaultSellingPriceGroup: { type: mongoose.Schema.Types.ObjectId, ref: 'SellingPriceGroup', default: null },
+  // featuredProduct: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
+  isActive: {type: Boolean, default: true},
+  paymentOption: [{
+    paymentMethod: { type: String },
+    is_enabled: { type: Boolean, default: true },
+    acount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount', default: null },
+
+
+  }]
+})
 
 const BusinessLocation = mongoose.model('BusinessLocation', businessLocationSchema);
 

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const quotationSchema = new mongoose.Schema({
-    businesLocation: { type: String },
+    businesLocation: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null },
     sellingPrice: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
     typeofService: { type: String },
     // customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },

@@ -13,14 +13,14 @@ const supplierSchema = new Schema({
     
     entity: {
         type: String,
-        enum: ['individual', 'business']
 
     },
 
-    contactId: Number,
-    customerGroup: {
+    contact_id: {type: String, unique: true, default:0},
+    customer_grp: {
         type: Schema.Types.ObjectId,
-        ref: 'CustomerGroup'
+        ref: 'CustomerGroup',
+        default: null
     },
     businessName:String,
 
@@ -41,14 +41,12 @@ const supplierSchema = new Schema({
     email: String,
     assignedTo: {
         type: String,
-        enum: ['Demo Admin', 'Ismail Shah']
     },
     taxNumber: String,
     openingBalance: Number,
     advanceBalance:Number,
     payTerm: {
         type: String,
-        enum: ['Month', 'Days']
     },
     addressLine1: String, 
     addressLine2: String, 
@@ -67,7 +65,8 @@ const supplierSchema = new Schema({
     customField9: String, 
     customField10: String,
     shippingAdress:String,
-
+    totalPurchaseDue:{type: Number ,default:0},
+    totalSaleDue:{type:Number, default:0}
 });
 
 const Contact = mongoose.model("Supplier", supplierSchema);

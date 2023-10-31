@@ -2,24 +2,62 @@
 
 
 // get all contacts according to thier contacttype
+const mongoose = require('mongoose');
+
 const Contact = require('../models/Supplier')
 const json2csv = require('json2csv').parse;
 const PDFDocument = require('pdfkit');
 const excel = require('excel4node');
+const Prefix = require('../models/prefixes')
+const Supplier = require('../models/Supplier');
+
+
+async function generateContactId() {
+  // Find the prefix for contacts in the Prefix schema
+  const prefixDocument = await Prefix.findOne();
+  // console.log(prefixDocument)
+  let prefix = ""; // Initialize a variable to store the contacts prefix
+
+  if (prefixDocument) {
+    prefix = prefixDocument.contacts;
+
+  }
+
+  // Find the highest current number in the Supplier schema
+  const highestSupplier = await Supplier.findOne().sort({ contact_id: -1 });
+  // console.log(highestSupplier)
+
+  if(!highestSupplier){
+    highestSupplier.contact_id = 0
+  }
+  let currentNumber = 1; // Initialize to 1 if there are no existing suppliers
+
+  if (highestSupplier) {
+    currentNumber = parseFloat(highestSupplier.contact_id) + parseFloat(1);
+  }
+
+
+
+  // Format the contact ID with the prefix and sequential number
+  const formattedNumber = currentNumber.toString().padStart(4, '0'); // Adjust the padding length as needed
+
+  return `${prefix}${formattedNumber}`;
+}
+
 
 const getAllContacts = async (req, res) => {
   const contactType = req.params.type;
   const showAdvanceBalance = req.query.advanceBalance === 'true';
   const showOpeningBalance = req.query.openingBalance === 'true';
-  const showPurchaseDue=req.query.purchaseDue==='true';
-  const showPurchaseReturn=req.query.purchaseReturn ==='true';
-  const showSellDue=req.query.sellDue==='true';
-  const showSellReturn=req.query.sellReturn==='true'
+  const showPurchaseDue = req.query.purchaseDue === 'true';
+  const showPurchaseReturn = req.query.purchaseReturn === 'true';
+  const showSellDue = req.query.sellDue === 'true';
+  const showSellReturn = req.query.sellReturn === 'true'
   // for contacttype supplier
   if (contactType === 'supplier') {
     try {
       let contacts;
-      if (showAdvanceBalance || showOpeningBalance || showPurchaseDue ||showPurchaseReturn) {
+      if (showAdvanceBalance || showOpeningBalance || showPurchaseDue || showPurchaseReturn) {
         const query = {
           contactType: 'supplier'
         };
@@ -34,13 +72,13 @@ const getAllContacts = async (req, res) => {
         if (showPurchaseDue) {
           query.purchaseDue = { $gt: 0 };
         }
-        if(showPurchaseReturn){
-          query.purchaseReturn={$gt:0};
+        if (showPurchaseReturn) {
+          query.purchaseReturn = { $gt: 0 };
         }
-      
-        
+
+
         contacts = await Contact.find(query);
-        
+
       } else {
         contacts = await Contact.find({ contactType: 'supplier' });
       }
@@ -50,13 +88,13 @@ const getAllContacts = async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   }
-// for contact type cutomer
+  // for contact type cutomer
 
 
   else if (contactType === 'customer') {
     try {
       let contacts;
-      if (showAdvanceBalance || showOpeningBalance || showSellDue ||showSellReturn) {
+      if (showAdvanceBalance || showOpeningBalance || showSellDue || showSellReturn) {
         const query = {
           contactType: 'customer'
         };
@@ -71,13 +109,13 @@ const getAllContacts = async (req, res) => {
         if (showSellDue) {
           query.sellDue = { $gt: 0 };
         }
-        if(showSellReturn){
-          query.sellReturn={$gt:0};
+        if (showSellReturn) {
+          query.sellReturn = { $gt: 0 };
         }
-      
-        
+
+
         contacts = await Contact.find(query);
-        
+
       } else {
         contacts = await Contact.find({ contactType: 'customer' });
       }
@@ -86,9 +124,9 @@ const getAllContacts = async (req, res) => {
       console.error('Error fetching contacts:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-    
-  } 
-  
+
+  }
+
   else {
     res.status(400).json({ error: 'Invalid contact type' });
   }
@@ -101,16 +139,16 @@ const exportContacts = async (req, res) => {
   try {
     let contacts;
     if (contactType === 'supplier' || contactType === 'customer') {
-      
+
       contacts = await Contact.find({ contactType });
 
-     
+
       res.attachment(`${contactType}_contacts.csv`);
       res.type('csv');
       const csvData = json2csv(contacts);
       res.send(csvData);
 
-      
+
       res.attachment(`${contactType}_contacts.pdf`);
       const pdfDoc = new PDFDocument();
       pdfDoc.pipe(res);
@@ -120,7 +158,7 @@ const exportContacts = async (req, res) => {
       });
       pdfDoc.end();
 
-     
+
       res.attachment(`${contactType}_contacts.xlsx`);
       const wb = new excel.Workbook();
       const ws = wb.addWorksheet('Contacts');
@@ -152,6 +190,16 @@ const createSupplierContact = async (req, res) => {
 
   try {
     const newContactData = req.body;
+    // console.log(newContactData.contact_id)
+
+    if (!newContactData.contact_id) {
+      // console.log("cf")
+
+      const generatedContactId = await generateContactId();
+      newContactData.contact_id = generatedContactId;
+      // console.log(newContactData.contact_id)
+
+    }
     const newSupplierContact = new Contact({
       contactType: 'supplier',
       ...newContactData
@@ -190,6 +238,7 @@ const updateSupplierContact = async (req, res) => {
 //delete supplier contact
 const deleteSupplierContact = async (req, res) => {
   const contactId = req.params.id;
+  console.log(contactId)
   try {
     const deletedSupplierContact = await Contact.findByIdAndDelete(contactId);
     if (deletedSupplierContact) {
@@ -239,47 +288,52 @@ const deleteAllSupplierContacts = async (req, res) => {
 
 // customer crud operation
 
-const createCustomerContact= async(req,res)=>{
-  try{
-    const newContactData=req.body;
-    const newCustomerData=new Contact({
-      contactType:'customer',
+const createCustomerContact = async (req, res) => {
+  try {
+    const newContactData = req.body;
+    if (!newContactData.contact_id) {
+      const generatedContactId = await generateContactId();
+      newContactData.contact_id = generatedContactId;
+
+    }
+    const newCustomerData = new Contact({
+      contactType: 'customer',
       ...newContactData
 
     })
-    const savedCustomerData=await newCustomerData.save();
+    const savedCustomerData = await newCustomerData.save();
     res.status(201).json(savedCustomerData);
 
-  }catch(error){
-    console.error('Customer data add',error);
+  } catch (error) {
+    console.error('Customer data add', error);
   }
 
 
 
 }
-const updateCustomerContact=async(req,res)=>{
-  const contactId=req.params.id;
-  try{
-    const updatedContactData=req.body;
-    const updateCustomerContact=await Contact.findByIdAndUpdate(
+const updateCustomerContact = async (req, res) => {
+  const contactId = req.params.id;
+  try {
+    const updatedContactData = req.body;
+    const updateCustomerContact = await Contact.findByIdAndUpdate(
       contactId,
-      {...updatedContactData},
-      {new:true}
+      { ...updatedContactData },
+      { new: true }
     );
-    if(updateCustomerContact){
+    if (updateCustomerContact) {
       res.json(updateCustomerContact);
-    }else{
+    } else {
       res.status(404).json('Customer contact not found');
     }
-  }catch(error){
-    console.error("Error updating customer contact",error);
-    res.status(500).json({error: 'Internal server error'});
+  } catch (error) {
+    console.error("Error updating customer contact", error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 
 }
 // delete custoemr by id
-const deleteCustomerContact=async(req,res)=>{
-  const contactId=req.params.id;
+const deleteCustomerContact = async (req, res) => {
+  const contactId = req.params.id;
   try {
     const deletedCustomerContact = await Contact.findByIdAndDelete(contactId);
     if (deletedCustomerContact) {
@@ -295,8 +349,8 @@ const deleteCustomerContact=async(req,res)=>{
 }
 
 // get customer by id
-const getCustomerContactById=async(req,res)=>{
-  const contactId=req.params.id;
+const getCustomerContactById = async (req, res) => {
+  const contactId = req.params.id;
   try {
     const customerContact = await Contact.findById(contactId);
     if (customerContact) {
@@ -337,6 +391,6 @@ module.exports = {
   updateCustomerContact,
   deleteCustomerContact,
   getCustomerContactById,
-  deleteAllCustomerContacts,exportContacts
+  deleteAllCustomerContacts, exportContacts
 
 };

@@ -1,17 +1,19 @@
+// routes/stockTransfersRoutes.js
 const express = require('express');
 const router = express.Router();
 const stockTransferController = require('../controllers/stockTransfersController');
-
+const {checkPermission} = require('../middleware/checkPermission'); 
+const authMiddleware = require('../middleware/authMiddleware'); 
 
 // Routes for stock transfers
-router.post('/', stockTransferController.createStockTransfer);
+router.post('/', authMiddleware,checkPermission('addStockTransfer'), stockTransferController.createStockTransfer);
 
-router.put('/:id', stockTransferController.updateStockTransfer);
+router.put('/:id',authMiddleware, checkPermission('editStockTransfer'), stockTransferController.updateStockTransfer);
 
-router.delete('/:id', stockTransferController.deleteStockTransfer);
+router.delete('/:id',authMiddleware, checkPermission('deleteStockTransfer'), stockTransferController.deleteStockTransfer);
 
-router.get('/:id', stockTransferController.getStockTransferById);
+router.get('/:id',authMiddleware, checkPermission('viewStockTransfer'), stockTransferController.getStockTransferById);
 
-router.get('/', stockTransferController.getAllStockTransfers);
+router.get('/', authMiddleware,checkPermission('viewAllStockTransfers'), stockTransferController.getAllStockTransfers);
 
 module.exports = router;

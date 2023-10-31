@@ -50,12 +50,14 @@ const production_m=require("./router/Production")
 // const financialRoutes = require('./router/financialRoutes');
 // const kitchenRoutes = require('./router/kitchenRoutes');
 const invoiceRoutes = require('./router/invoiceRoutes');
+const prefixRoutes = require('./router/prefixRoutes');
+const reportRoute = require('./router/reportController');
 
 const PORT = process.env.PORT || 8000;
 
 app.use(cors());
 app.use(express.json());
-// app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static('uploads'));
 // app.use('/', uploads);
 app.use(bodyParser.json());
 
@@ -91,6 +93,7 @@ app.use('/admin/add-accounts', accountRoutes);
 app.use('/admin/accounttypes', accountTypeRoutes);
 app.use('/admin/invoices', invoiceRoutes);
 app.use('/admin/account', financialRoutes);
+app.use('/admin/prefix', prefixRoutes);
 
 // MY routes
 app.use("/admin", contact_routes);
@@ -100,12 +103,11 @@ app.use("/admin",purchase_due);
 app.use("/admin",purchase_return);
 app.use("/admin",recipe_s);
 app.use("/admin",production_m);
-// app.use('/finance', financialRoutes);
 // app.use('/admin/kitchen', kitchenRoutes);
 
 
-
 app.use('/admin/business-locations', businessLocationRoutes);
+app.use('/admin/reports', reportRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

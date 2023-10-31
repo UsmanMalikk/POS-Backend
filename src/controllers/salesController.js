@@ -4,23 +4,24 @@ const Invoice = require('../models/invoice');
 const Quotation = require('../models/addQuotations');
 const Draft = require('../models/addDraft');
 const Account = require('../models/addAccount');
+const Product = require('../models/addProduct');
+const Admin = require('../models/admin');
+const User = require('../models/addUser');
+const Pos = require('../models/addPos');
+const Supplier = require('../models/Supplier');
 
 async function generateInvoiceNumber() {
-    const invoice = await Invoice.findOne({ setAsDefault: true });
+    const invoice = await Invoice.findOne({ isDefault: true });
     let currentInvoiceNumber = invoice.currentInvoiceNumber;
     let prefix = invoice.namePrefix;
     let numberOfDigits = invoice.numberOfDigits
-    let startFrom = invoice.startFrom
     // Use the specified starting number if provided
-    if (startFrom === 0) {
-        currentInvoiceNumber = invoice.startFrom;
-    }
 
     // Increment the invoice number
     currentInvoiceNumber++;
 
     // Update the currentInvoiceNumber in the database
-    await Invoice.findOneAndUpdate({ setAsDefault: true }, { currentInvoiceNumber });
+    await Invoice.findOneAndUpdate({ isDefault: true }, { currentInvoiceNumber });
 
     // Generate the formatted invoice number
     if (prefix === '') {
@@ -38,15 +39,15 @@ exports.getAllSales = async (req, res) => {
     try {
         if (saleType === 'draft') {
 
-            const drafts = await Draft.find();
+            const drafts = await Draft.find().populate('customer', 'firstName prefix mobile').populate('deliveryPersonUser', 'firstName').populate('businesLocation', 'name').populate('deliveryPersonAdmin', 'firstName');
             res.status(200).json(drafts);
         }
         else if (saleType === 'quotations') {
-            const quotations = await Quotation.find();
+            const quotations = await Quotation.find().populate('customer', 'firstName prefix mobile').populate('deliveryPersonUser', 'firstName').populate('businesLocation', 'name').populate('deliveryPersonAdmin', 'firstName');
             res.status(200).json(quotations);
         }
         else {
-            const sales = await Sale.find().populate('deliveryPerson', 'firstName');
+            const sales = await Sale.find().populate('customer', 'firstName prefix mobile').populate('deliveryPersonUser', 'firstName').populate('businesLocation', 'name').populate('deliveryPersonAdmin', 'firstName');
             res.status(200).json(sales);
         }
     }
@@ -62,7 +63,7 @@ exports.getAllSales = async (req, res) => {
 exports.createSale = async (req, res) => {
     const saleData = req.body;
     const saleType = req.params.type;
-
+    // console.log(saleType)
     try {
         if (saleType === 'draft' || saleData.status === 'Draft') {
             if (saleData.invoiceNumber === "") {
@@ -71,21 +72,9 @@ exports.createSale = async (req, res) => {
 
             }
 
-            // Add the generated invoice number to the sale data
-            let totalSaleAmount = 0
-            // console.log(saleData.invoiceNumber)
-            saleData.inputData.forEach((item) => {
-                totalSaleAmount += item.subtotal;
-            });
-
-            const newDraft = new Draft({
-                totalSaleAmount: totalSaleAmount,
-                ...saleData
-            });
-            const draftSaved = await newDraft.save();
-            // const newSale = await Sale.create(saleData);
+            const newDraft = await Draft.create(saleData);
             // console.log(newSale)
-            res.status(201).json({ message: 'Draft added successfully', draft: draftSaved });
+            res.status(201).json({ message: 'Draft added successfully', draft: newDraft });
         }
         else if (saleType === 'quotations' || saleData.status === 'Quotation') {
 
@@ -95,41 +84,59 @@ exports.createSale = async (req, res) => {
 
             }
 
-            // Add the generated invoice number to the sale data
-            let totalSaleAmount = 0
-            // console.log(saleData.invoiceNumber)
-            saleData.inputData.forEach((item) => {
-                totalSaleAmount += item.subtotal;
-            });
-
-            const newQuotation = new Quotation({
-                totalSaleAmount: totalSaleAmount,
-                ...saleData
-            });
-            const quotationSaved = await newQuotation.save();
-            // const newSale = await Sale.create(saleData);
+            const newQuotation = await Quotation.create(saleData);
             // console.log(newSale)
-            res.status(201).json({ message: 'Quotation added successfully', quotation: quotationSaved });
+            res.status(201).json({ message: 'Quotation added successfully', quotation: newQuotation });
         }
         else {
-            // const invoiceScheme = saleData.invoiceScheme;
-            // const invoicePrefix = invoiceScheme.namePrefix;
-            // const startFrom = invoiceScheme.startFrom; // Get the starting number from the sale data
-            // const numberOfDigits = invoiceScheme.numberOfDigits; // Get the number of digits from the sale data
-            if(saleData.paymentAccount){
+            const adminUser = await Admin.findOne({ _id: saleData.deliveryPerson });
+            let deliveryPersonAdmin = null;
+            let deliveryPersonUser = null;
+
+            if (adminUser) {
+                // If the deliveryPerson is an Admin, assign it to deliveryPersonAdmin
+                deliveryPersonAdmin = saleData.deliveryPerson;
+            } else {
+                // If not, check in the AddUser schema
+                const addUser = await User.findOne({ _id: saleData.deliveryPerson });
+
+                if (addUser) {
+                    // If the deliveryPerson is an AddUser, assign it to deliveryPersonUser
+                    deliveryPersonUser = saleData.deliveryPerson;
+                }
+            }
+
+            if (saleData.paymentAccount) {
                 const paymentAccount = await Account.findOne({ _id: saleData.paymentAccount });
 
                 if (!paymentAccount) {
                     return res.status(400).json({ message: 'Payment account not found' });
                 }
-    
+
                 // Subtract the sale amount from the account's opening balance
-                paymentAccount.openingBalance -= saleData.amount;
-    
+                paymentAccount.openingBalance = parseFloat(paymentAccount.openingBalance) + parseFloat(saleData.amount);
+
                 // Save the updated account back to the AddAccount schema
                 await paymentAccount.save();
             }
-            
+
+            if (saleData.amount < saleData.totalSaleAmount || saleData.paymentMethod === "") {
+           
+                const customerId = saleData.customer;
+    
+                // Find the supplier in the database
+                const customer = await Supplier.findOne({ _id: customerId });
+    
+                if (!customer) {
+                    return res.status(404).json({ message: 'customer not found' });
+                }
+    
+                // Increment the totalPurchaseDue for the supplier
+                customer.totalPurchaseDue = parseFloat(saleData.totalSaleAmount) + parseFloat(saleData.amount);
+    
+                // Save the updated supplier
+                await customer.save();
+            }
 
             if (saleData.invoiceNumber === "") {
                 const generatedInvoiceNumber = await generateInvoiceNumber();
@@ -137,21 +144,34 @@ exports.createSale = async (req, res) => {
 
             }
 
-            // Add the generated invoice number to the sale data
-            let totalSaleAmount = 0
-            // console.log(saleData.invoiceNumber)
-            saleData.inputData.forEach((item) => {
-                totalSaleAmount += item.subtotal;
-            });
+            // Add stock minus
 
-            const newSale = new Sale({
-                totalSaleAmount: totalSaleAmount,
-                ...saleData
+            if (saleData.inputData && saleData.inputData.length > 0) {
+                for (const saleItem of saleData.inputData) {
+                    const product = await Product.findById(saleItem.product);
+
+                    if (product) {
+                        if (product.totalQuantity >= saleItem.quantity) {
+                            // product.openingStock.quantityRemaining -= saleItem.quantity;
+                            product.totalQuantity = parseFloat(product.totalQuantity) - parseFloat(saleItem.quantity);
+
+                            await product.save();
+                        } else {
+                            return res.status(400).json({ message: 'Insufficient product quantity' });
+                        }
+                    } else {
+                        return res.status(404).json({ message: 'Product not found' });
+                    }
+                }
+            }
+
+            const newSale = await Sale.create({
+                ...saleData,
+                deliveryPersonAdmin,
+                deliveryPersonUser,
             });
-            const saleSaved = await newSale.save();
-            // const newSale = await Sale.create(saleData);
-            // console.log(newSale)
-            res.status(201).json({ message: 'Sale added successfully', sale: saleSaved });
+    
+            res.status(201).json({ message: 'Sale added successfully', sale: newSale });
         }
 
     } catch (error) {
@@ -159,17 +179,6 @@ exports.createSale = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-// exports.createSale = async (req, res) => {
-//     const saleData = req.body;
-
-//     try {
-//         const newSale = await Sale.create(saleData);
-//         res.status(201).json({ message: 'Sale added successfully', sale: newSale });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Internal server error' });
-//     }
-// };
 
 // Get a sale by ID
 exports.getSaleById = async (req, res) => {
@@ -200,7 +209,7 @@ exports.getSaleById = async (req, res) => {
         }
 
         else {
-            const sale = await Sale.findById(saleId).populate('inputData.product','productName').populate('sellingPrice','name');
+            const sale = await Sale.findById(saleId).populate('customer', 'firstName prefix mobile addressLine1').populate('inputData.product', 'productName').populate('sellingPrice', 'name');
 
             if (!sale) {
                 return res.status(404).json({ message: 'Sale not found' });
@@ -304,14 +313,14 @@ exports.deleteSale = async (req, res) => {
 
 // GET /shipments/:status
 exports.saleShipment = async (req, res) => {
-    // const shipmentStatus = req.params.status;
-    // if (!shipmentStatus || shipmentStatus.trim() === '') {
-    //     return res.status(400).json({ message: 'Please provide a valid shipment status' });
-    //   }
-
     try {
-        const shipments = await Sale.find({ shippingStatus: { $ne: "" } });
-        res.status(200).json(shipments);
+        const shipments = await Promise.all([
+            Sale.find({ shippingStatus: { $ne: "" } }).populate('customer', 'firstName mobile').populate('deliveryPersonUser', 'firstName').populate('businesLocation', 'name').populate('deliveryPersonAdmin', 'firstName'),
+            Pos.find({ shippingStatus: { $ne: "" } }).populate('customer', 'firstName mobile').populate('deliveryPersonUser', 'firstName').populate('businesLocation', 'name').populate('deliveryPersonAdmin', 'firstName')
+        ]);
+
+        const combinedShipments = [].concat(...shipments);
+        res.status(200).json(combinedShipments);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });

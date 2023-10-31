@@ -7,18 +7,9 @@ exports.createStockAdjustment = async (req, res) => {
     const adjustmentData = req.body;
 
     try {
-        let totalAmount = 0
-        // console.log(saleData.invoiceNumber)
-        adjustmentData.inputData.forEach((item) => {
-            totalAmount += item.subtotal;
-        });
+        const newAdjustment = await StockAdjustment.create(adjustmentData);
 
-        const newAdjustment = new StockAdjustment({
-            totalAmount: totalAmount,
-            ...adjustmentData
-        });
-        const adjSaved = await newAdjustment.save();
-        res.status(201).json({ message: 'Stock adjustment added successfully', adjustment: adjSaved });
+        res.status(201).json({ message: 'Stock adjustment added successfully', adjustment: newAdjustment });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -67,7 +58,7 @@ exports.getStockAdjustmentById = async (req, res) => {
     const adjustmentId = req.params.id;
 
     try {
-        const adjustment = await StockAdjustment.findById(adjustmentId).populate('inputData.product','productName');
+        const adjustment = await StockAdjustment.findById(adjustmentId).populate('inputData.product','productName').populate('businesLocation','name landmark city state country mobileNo');
 
         if (!adjustment) {
             return res.status(404).json({ message: 'Stock adjustment not found' });
@@ -82,7 +73,7 @@ exports.getStockAdjustmentById = async (req, res) => {
 // Controller for GET /stock-adjustment
 exports.getAllStockAdjustments = async (req, res) => {
     try {
-        const adjustments = await StockAdjustment.find();
+        const adjustments = await StockAdjustment.find().populate('businesLocation','name');
         res.status(200).json(adjustments);
     } catch (error) {
         console.error(error);

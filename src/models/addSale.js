@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const saleSchema = new mongoose.Schema({
-    businesLocation: { type: String },
+    businesLocation: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null },
     sellingPrice: { type: mongoose.Schema.Types.ObjectId, ref: 'SellingPriceGroup' , default:null},
     // typeofService: { type: String },
-    // customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
-    customer: { type: String },
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' },
+    // customer: { type: String },
 
     //billing add
     //shipping add
@@ -52,7 +52,8 @@ const saleSchema = new mongoose.Schema({
     shippingCharges: { type: Number },
     shippingStatus: { type: String },
     deliveredTo: { type: String },
-    deliveryPerson: { type: mongoose.Schema.Types.ObjectId, ref: 'AddUser', default:null },
+    deliveryPersonUser: { type: mongoose.Schema.Types.ObjectId, ref: 'AddUser', default:null },
+    deliveryPersonAdmin: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default:null },
 
     additionalExpenseName: { type: String },
     additionalExpenseAmount: { type: Number },

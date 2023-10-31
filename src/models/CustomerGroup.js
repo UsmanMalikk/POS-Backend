@@ -2,24 +2,21 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const customerGroupSchema = new Schema({
-    groupName: {
+    customerGroupName: {
         type: String,
         required: true
     },
-    priceCalculation: {
+    calculationType: {
         type: String,
         enum: ['Percentage', 'Selling Price Group'],
         required: true
     },
     calculationPercentage: {
         type: Number,
-        required: function() {
-            return this.priceCalculation === 'Percentage';
-        }
+        
     },
     sellingPriceGroup: {
-        type: String,
-        enum: ['retail', 'Saleman', 'Local Sale' ,'Minimum points','Sale Points'] // Add other possible values
+        type: mongoose.Schema.Types.ObjectId, ref: 'SellingPriceGroup', default: null
     },
     // ... (other fields)
 });

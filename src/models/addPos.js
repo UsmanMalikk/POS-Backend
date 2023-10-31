@@ -1,14 +1,10 @@
 const mongoose = require('mongoose');
 
 const posSchema = new mongoose.Schema({
-    businesLocation: { type: String },
-    sellingPrice: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    // typeofService: { type: String },
-    // customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
-    customer: { type:String },
+    businesLocation: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null },
+    sellingPrice: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' },
 
-    //billing add
-    //shipping add
     payTerm: { type: String },
     salesDate: { type: Date, default: Date.now },
     status: { type: String },
@@ -17,14 +13,10 @@ const posSchema = new mongoose.Schema({
 
     byPos: { type: Boolean, default: true },
 
-    // orderStatus:{type: String, default: "Received"},  was for kitchen tab
-    //Attach doc
-    //select table
-    //select service staff
 
     inputData: [
         {
-            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
             productName: {type: String},
             quantity: { type: Number, default: 0 },
             unitPrice: { type: Number, default: 0.00 },
@@ -44,10 +36,10 @@ const posSchema = new mongoose.Schema({
     discountAmount: { type: Number },
 
     //Redeemed
+    deliveryPersonUser: { type: mongoose.Schema.Types.ObjectId, ref: 'AddUser', default:null },
+    deliveryPersonAdmin: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default:null },
 
-
-    orderTaxType: { type: String },
-    orderTax: { type: Number },
+    
     sellNote: { type: String },
 
     shippingDetails: { type: String },
@@ -71,7 +63,7 @@ const posSchema = new mongoose.Schema({
     amount: { type: Number },
     paymentDate: { type: Date, default: Date.now },
     paymentMethod: { type: String },
-    paymentAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' },
+    paymentAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount', default: null },
     paymentNote: { type: String },
 
 

@@ -3,9 +3,21 @@ const SellingPriceGroup = require('../models/sellingPriceGroup');
 // Controller function to add a new selling price group
 exports.addSellingPriceGroup = async (req, res) => {
   try {
-    const { name, description, price } = req.body;
-    const sellingPriceGroup = new SellingPriceGroup({ name, description, price });
+    const { name, description, price, isDefault } = req.body;
+
+    // Check if there's an existing default selling price group
+    const existingDefaultGroup = await SellingPriceGroup.findOne({ isDefault: true });
+
+    // Update the existing default group, if it exists
+    if (existingDefaultGroup) {
+      existingDefaultGroup.isDefault = false;
+      await existingDefaultGroup.save();
+    }
+
+    // Create or update the new selling price group
+    const sellingPriceGroup = new SellingPriceGroup({ name, description, price, isDefault });
     const savedGroup = await sellingPriceGroup.save();
+
     res.status(201).json(savedGroup);
   } catch (error) {
     console.error(error);
@@ -29,12 +41,28 @@ exports.deleteSellingPriceGroup = async (req, res) => {
 exports.editSellingPriceGroup = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, price } = req.body;
+    const { name, description, price, isDefault } = req.body;
+
+    // Check if there's an existing default selling price group
+    const existingDefaultGroup = await SellingPriceGroup.findOne({ isDefault: true });
+
+    // Update the existing default group, if it exists
+    if (existingDefaultGroup) {
+      existingDefaultGroup.isDefault = false;
+      await existingDefaultGroup.save();
+    }
+
+    // Update the specified selling price group
     const updatedGroup = await SellingPriceGroup.findByIdAndUpdate(
       id,
-      { name, description, price },
+      { name, description, price, isDefault },
       { new: true }
     );
+
+    // Set the edited group as the default
+    updatedGroup.isDefault = true;
+    await updatedGroup.save();
+
     res.status(200).json(updatedGroup);
   } catch (error) {
     console.error(error);

@@ -16,7 +16,7 @@ exports.createLocation = async (req, res) => {
 // Get a list of all business locations
 exports.getLocations = async (req, res) => {
   try {
-    const locations = await BusinessLocation.find();
+    const locations = await BusinessLocation.find({isActive : true}).populate('paymentOption.acount','name').populate('defaultSellingPriceGroup','name');
     res.status(200).json(locations);
   } catch (error) {
     console.error(error);

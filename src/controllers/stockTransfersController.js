@@ -7,19 +7,9 @@ exports.createStockTransfer = async (req, res) => {
     const transferData = req.body;
 
     try {
-        let totalAmount = 0
-        // console.log(saleData.invoiceNumber)
-        transferData.inputData.forEach((item) => {
-            totalAmount += item.subtotal;
-        });
-
-        const newTransfer = new StockTransfer({
-            totalAmount: totalAmount,
-            ...transferData
-        });
-        const transferSaved = await newTransfer.save();
-        // const newTransfer = await StockTransfer.create(transferData);
-        res.status(201).json({ message: 'Stock transfer added successfully', transfer: transferSaved });
+        
+        const newTransfer = await StockTransfer.create(transferData);
+        res.status(201).json({ message: 'Stock transfer added successfully', transfer: newTransfer });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -32,6 +22,7 @@ exports.updateStockTransfer = async (req, res) => {
     const transferData = req.body;
 
     try {
+       
         const updatedTransfer = await StockTransfer.findByIdAndUpdate(transferId, transferData, { new: true });
 
         if (!updatedTransfer) {
@@ -68,7 +59,7 @@ exports.getStockTransferById = async (req, res) => {
     const transferId = req.params.id;
 
     try {
-        const transfer = await StockTransfer.findById(transferId);
+        const transfer = await StockTransfer.findById(transferId).populate('inputData.product','productName').populate('fromLocation','name landmark city state country mobileNo').populate('toLocation','name landmark city state country mobileNo');
 
         if (!transfer) {
             return res.status(404).json({ message: 'Stock transfer not found' });
@@ -84,7 +75,7 @@ exports.getStockTransferById = async (req, res) => {
 // Controller for GET /stock-transfers
 exports.getAllStockTransfers = async (req, res) => {
     try {
-        const transfers = await StockTransfer.find();
+        const transfers = await StockTransfer.find().populate('fromLocation','name').populate('toLocation','name');
         res.status(200).json(transfers);
     } catch (error) {
         console.error(error);

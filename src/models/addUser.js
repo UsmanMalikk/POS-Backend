@@ -37,7 +37,7 @@ const addUserSchema = new mongoose.Schema({
     
     
     // ROLES
-    role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role' }, // Reference to the Role collection
+    role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', default: null }, // Reference to the Role collection
 
 
     // allLocations: {type: Boolean },

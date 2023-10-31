@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const adminSchema = new mongoose.Schema({
+    
+    // businessName: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null, required: true },
 
     businessName: { type: String, required: true },
     startDate: { type: Date, required: true, default: Date.now},
@@ -22,7 +24,7 @@ const adminSchema = new mongoose.Schema({
     tax2Name: { type: String },
     tax2No: { type: Number },
     financialYearStartMonth: { type: String },
-    stockAccountingMethod: { type: String, enum: ['First in First Out', 'Last in First Out'] },
+    stockAccountingMethod: { type: String, enum: ['FIFO', 'LIFO'] },
 
 
     prefix: { type: String },
@@ -31,8 +33,37 @@ const adminSchema = new mongoose.Schema({
     userName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    cpassword: { type: String, required: true }
+    cpassword: { type: String, required: true },
 
+    role: { type: String, default: "Admin" }, // Reference to the Role collection
+
+    dateOfBirth: { type: Date, default: Date.now},
+    gender: { type: String },
+    maritalStatus: { type: String },
+    bloodGroup: { type: String },
+    mobileNumber: { type: Number },
+    alternateContactNumber: { type: Number },
+    familyContactNumber: { type: Number },
+    facebookLink: { type: String },
+    twitterLink: { type: String },
+
+
+    //6 fields like customerfield 1,2,3,4 and social media 1,2
+
+    idProofName: { type: String },
+    idProofNumber: { type: Number },
+
+    permanentAddress: { type: String },
+    currentAddress: { type: String },
+
+    //Bank details
+
+    accountHolderName: { type: String },
+    accountNumber: { type: Number },
+    bankName: { type: String },
+    bankIdentifierCode: { type: Number },
+    branch: { type: String },
+    taxPayerId: { type: Number },
 });
 
 const Admin = mongoose.model('Admin', adminSchema);
