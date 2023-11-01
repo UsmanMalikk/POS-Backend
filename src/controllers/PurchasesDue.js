@@ -2,34 +2,41 @@ const PurchasesDue = require('../models/PurchasesDue');
 const Account = require('../models/addAccount');
 const Product = require('../models/addProduct');
 const Supplier = require('../models/Supplier');
+const Prefix = require('../models/prefixes')
 
-async function generateReferenceNo() {
-    const purchase = await PurchasesDue.findOne().sort({ referenceNo: -1 });
-    // console.log(product)
-    if (purchase) {
-        // If a product with SKU exists, increment it by one
-        const latestSku = purchase.referenceNo;
-        const newSku = latestSku + 1;
-        // let prefix = invoice.namePrefix;                         ///FromPreffix schema later
-
-
-        // Generate the formatted invoice number
-        // if (prefix === '') {
-        return newSku;
-
+async function generatePurchaseId() {
+    // Find the prefix for contacts in the Prefix schema
+    const prefixDocument = await Prefix.findOne();
+    // console.log(prefixDocument)
+    let prefix = ""; // Initialize a variable to store the contacts prefix
+  
+    if (prefixDocument) {
+      prefix = prefixDocument.purchase;
+  
     }
-    else {
-        const newSku = 1;
-        return newSku;
-
+  
+    // Find the highest current number in the Supplier schema
+    const highestPurchase = await PurchasesDue.findOne().sort({ referenceNo: -1 });
+    // console.log(highestSupplier)
+  
+    if(!highestPurchase){
+        highestPurchase.contact_id = 0
     }
-    // } else {
-    //     // const currentYear = new Date().getFullYear();
-    //     return `${prefix}-${currentInvoiceNumber.toString().padStart(numberOfDigits, '0')}`;
-    // }
+    let currentNumber = 1; // Initialize to 1 if there are no existing suppliers
+  
+    if (highestPurchase) {
+      currentNumber = parseFloat(highestPurchase.referenceNo) + parseFloat(1);
+    }
+  
+  
+  
+    // Format the contact ID with the prefix and sequential number
+    const formattedNumber = currentNumber.toString().padStart(4, '0'); // Adjust the padding length as needed
+  
+    return `${prefix}${formattedNumber}`;
+  }
+  
 
-    // return null; // Invalid format
-}
 
 const getAllPurchases = async (req, res) => {
     try {
@@ -116,6 +123,14 @@ const createNewPurchase = async (req, res) => {
     const purchaseData = req.body;
     // console.log(purchaseData)
     try {
+        if (!purchaseData.referenceNo) {
+            // console.log("cf")
+      
+            const generatedPurchaseId = await generatePurchaseId();
+            purchaseData.referenceNo = generatedPurchaseId;
+            // console.log(newContactData.contact_id)
+      
+          }
 
         if (purchaseData.paymentAccount) {
             const paymentAccount = await Account.findOne({ _id: purchaseData.paymentAccount });
@@ -237,7 +252,21 @@ const deletePurchaseById = async (req, res) => {
     }
 };
 
+const getByIdPurchase = async (req, res) => {
+    const purchaseId = req.params.id;
+
+    try {
+        const purchase = await PurchasesDue.findById(purchaseId).populate('businessLocation','name').populate('supplier','firstName');
+
+        if (!purchase) {
+            return res.status(404).json({ message: 'Purchase not found' });
+        }
+        res.status(200).json(purchase);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
 
-
-module.exports = { getAllPurchases, createNewPurchase, updatePurchase, deletePurchaseById };
+module.exports = { getAllPurchases, createNewPurchase, updatePurchase, deletePurchaseById , getByIdPurchase};

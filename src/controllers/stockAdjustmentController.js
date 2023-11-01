@@ -1,12 +1,53 @@
 // stockAdjustmentController.js
 
 const StockAdjustment = require('../models/addStockadjustment');
+const Prefix = require('../models/prefixes')
 
+async function generateStockAdjustmentId() {
+    // Find the prefix for contacts in the Prefix schema
+    const prefixDocument = await Prefix.findOne();
+    // console.log(prefixDocument)
+    let prefix = ""; // Initialize a variable to store the contacts prefix
+  
+    if (prefixDocument) {
+      prefix = prefixDocument.stockAdjustment;
+  
+    }
+  
+    // Find the highest current number in the Supplier schema
+    const highestNo = await StockAdjustment.findOne().sort({ referenceNumber: -1 });
+    // console.log(highestSupplier)
+  
+    if(!highestNo){
+        highestNo.referenceNumber = 0
+    }
+    let currentNumber = 1; // Initialize to 1 if there are no existing suppliers
+  
+    if (highestNo) {
+      currentNumber = parseFloat(highestNo.referenceNumber) + parseFloat(1);
+    }
+  
+  
+  
+    // Format the contact ID with the prefix and sequential number
+    const formattedNumber = currentNumber.toString().padStart(4, '0'); // Adjust the padding length as needed
+  
+    return `${prefix}${formattedNumber}`;
+  }
+  
 // Controller for POST /stock-adjustment
 exports.createStockAdjustment = async (req, res) => {
     const adjustmentData = req.body;
 
     try {
+        if (!adjustmentData.referenceNumber) {
+            // console.log("cf")
+      
+            const generatedStockAdjustmentId = await generateStockAdjustmentId();
+            adjustmentData.referenceNumber = generatedStockAdjustmentId;
+            // console.log(newContactData.contact_id)
+      
+          }
         const newAdjustment = await StockAdjustment.create(adjustmentData);
 
         res.status(201).json({ message: 'Stock adjustment added successfully', adjustment: newAdjustment });

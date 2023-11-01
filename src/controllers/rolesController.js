@@ -15,7 +15,7 @@ exports.getAllRoles = async (req, res) => {
 // Create a new role
 exports.createRole = async (req, res) => {
     const roleData = req.body;
-
+    // console.log(req.user.userId)
     try {
         const newRole = await Role.create(roleData);
         res.status(201).json({ message: 'Role added successfully', role: newRole });

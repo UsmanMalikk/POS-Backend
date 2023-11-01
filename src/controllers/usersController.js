@@ -212,26 +212,4 @@ exports.updateUserProfilePassword = async (req, res) => {
     }
 };
 
-// Controller for GET /User /:id
-exports.getLoggedInUserById = async (req, res) => {
-    const userId = req.user.userId;
 
-    try {
-        // Try to find the user in the User schema
-        let user = await User.findById(userId);
-
-        if (!user) {
-            // If not found in the User schema, try finding in the Admin schema
-            user = await Admin.findById(userId);
-
-            if (!user) {
-                return res.status(404).json({ message: 'User or Admin not found' });
-            }
-        }
-
-        res.status(200).json(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-};

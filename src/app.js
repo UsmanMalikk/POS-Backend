@@ -52,6 +52,9 @@ const production_m=require("./router/Production")
 const invoiceRoutes = require('./router/invoiceRoutes');
 const prefixRoutes = require('./router/prefixRoutes');
 const reportRoute = require('./router/reportController');
+const contactCustomLabelRoutes = require('./router/contactCustomLabelRoutes');
+const productCustomLabelRoutes = require('./router/productCustomLabelRoutes');
+const purchaseCustomLabelRoutes = require('./router/purchaseCustomLabelRoutes');
 
 const PORT = process.env.PORT || 8000;
 
@@ -104,6 +107,9 @@ app.use("/admin",purchase_return);
 app.use("/admin",recipe_s);
 app.use("/admin",production_m);
 // app.use('/admin/kitchen', kitchenRoutes);
+app.use('/admin/contact-custom-label', contactCustomLabelRoutes);
+app.use('/admin/product-custom-label', productCustomLabelRoutes);
+app.use('/admin/purchase-custom-label', purchaseCustomLabelRoutes);
 
 
 app.use('/admin/business-locations', businessLocationRoutes);
