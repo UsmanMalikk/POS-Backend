@@ -26,7 +26,7 @@ const productSchema = new mongoose.Schema({
 
   totalQuantity: { type: Number },
   //opening stock end
-  unitPurchasePrice: { type: Number, default: 0.00},
+  unitPurchasePrice: { type: Number, default: 0.00 },
   unitSellingPrice: { type: Number, default: 0.00 },
 
   combo: [{ type: String }],
@@ -51,8 +51,18 @@ const productSchema = new mongoose.Schema({
   }],
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand', default: null },
-  subCategory: { type: String }
+  subCategory: { type: String },
   // warranty: { type: mongoose.Schema.Types.ObjectId, ref: 'Warranty' }
+  customLable1: { type: String },
+  customLable2: { type: String },
+  customLable3: { type: String },
+  customLable4: { type: String },
+  customLable5: { type: String },
+  customLable6: { type: String },
+  customLable7: { type: String },
+  customLable8: { type: String },
+  customLable9: { type: String },
+  customLable10: { type: String },
 });
 
 const Product = mongoose.model('Product', productSchema);

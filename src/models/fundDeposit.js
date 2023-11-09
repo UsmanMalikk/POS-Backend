@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const fundDepositSchema = new mongoose.Schema({
-  depositTo: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' },
-  depositFrom: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' },
+  depositTo: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' , default: null},
+  depositFrom: { type: mongoose.Schema.Types.ObjectId, ref: 'AddAccount' , default: null},
   amount: { type: Number, required: true },
   date: { type: Date, default: Date.now },
   note: { type: String }, 

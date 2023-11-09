@@ -8,6 +8,8 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/', productCustomLabelController.createProductCustomLabel);
 router.get('/', productCustomLabelController.getProductCustomLabels);
+router.put('/', productCustomLabelController.updateProductCustomLabel);
+router.get('/withdropdown', productCustomLabelController.getProductCustomLabelsWithArrayDropdown);
 
 // router.get('/:id', productCustomLabelController.getContactCustomLabelById);
 

@@ -63,7 +63,10 @@ const purchaseDueSchema = new Schema({
     year:{ type: Number },
     securityCode:{ type: Number },
 
-
+    customLable1: { type: String },
+    customLable2: { type: String },
+    customLable3: { type: String },
+    customLable4: { type: String },
 
 });
 

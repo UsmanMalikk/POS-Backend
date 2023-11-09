@@ -97,7 +97,7 @@ exports.getProductById = async (req, res) => {
     const productId = req.params.id;
 
     try {
-        const product = await Product.findById(productId).populate('brand', 'brandName').populate('category', 'categoryName').populate('unit', 'name shortName').populate('businessLocation','name');
+        const product = await Product.findById(productId).populate('brand', 'brandName').populate('category', 'categoryName').populate('unit', 'name shortName').populate('businessLocation','name').populate('grpPrices.spg', 'name');
 
         if (!product) {
             return res.status(404).json({ message: 'product not found' });

@@ -45,16 +45,15 @@ const group_routes=require("./router/Customergroup")
 const purchase_routes=require("./router/PurchaseOrder")
 const purchase_due=require("./router/AddPurchases")
 const purchase_return=require("./router/PurchaseReturn")
-const recipe_s=require("./router/Recipe")
-const production_m=require("./router/Production")
 // const financialRoutes = require('./router/financialRoutes');
 // const kitchenRoutes = require('./router/kitchenRoutes');
 const invoiceRoutes = require('./router/invoiceRoutes');
 const prefixRoutes = require('./router/prefixRoutes');
-const reportRoute = require('./router/reportController');
+// const reportRoute = require('./router/reportController');
 const contactCustomLabelRoutes = require('./router/contactCustomLabelRoutes');
 const productCustomLabelRoutes = require('./router/productCustomLabelRoutes');
 const purchaseCustomLabelRoutes = require('./router/purchaseCustomLabelRoutes');
+const systemColorRoutes = require('./router/systemColorRoutes');
 
 const PORT = process.env.PORT || 8000;
 
@@ -104,8 +103,6 @@ app.use("/admin",group_routes);
 app.use("/admin",purchase_routes);
 app.use("/admin",purchase_due);
 app.use("/admin",purchase_return);
-app.use("/admin",recipe_s);
-app.use("/admin",production_m);
 // app.use('/admin/kitchen', kitchenRoutes);
 app.use('/admin/contact-custom-label', contactCustomLabelRoutes);
 app.use('/admin/product-custom-label', productCustomLabelRoutes);
@@ -113,7 +110,8 @@ app.use('/admin/purchase-custom-label', purchaseCustomLabelRoutes);
 
 
 app.use('/admin/business-locations', businessLocationRoutes);
-app.use('/admin/reports', reportRoute);
+// app.use('/admin/reports', reportRoute);
+app.use('/admin/system-color', systemColorRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

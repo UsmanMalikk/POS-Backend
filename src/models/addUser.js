@@ -27,12 +27,11 @@ const addUserSchema = new mongoose.Schema({
 
     prefix: { type: String },
     firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    userName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    lastName: { type: String, },
+    userName: { type: String },
+    email: { type: String, unique: true },
     password: { type: String, required: true },
     cPassword: { type: String, required: true },
-    allowLogin: {type: Boolean, default: true},
     
     
     
@@ -52,10 +51,10 @@ const addUserSchema = new mongoose.Schema({
 
 
     dateOfBirth: { type: Date, default: Date.now},
-    gender: { type: String, required: true },
+    gender: { type: String, },
     maritalStatus: { type: String },
     bloodGroup: { type: String },
-    mobileNumber: { type: Number, required: true },
+    mobileNumber: { type: Number, },
     alternateContactNumber: { type: Number },
     familyContactNumber: { type: Number },
     facebookLink: { type: String },
@@ -72,12 +71,12 @@ const addUserSchema = new mongoose.Schema({
 
     //Bank details
 
-    accountHolderName: { type: String, required: true },
-    accountNumber: { type: Number, required: true },
-    bankName: { type: String, required: true },
-    bankIdentifierCode: { type: Number, required: true },
-    branch: { type: String, required: true },
-    taxPayerId: { type: Number, required: true },
+    accountHolderName: { type: String, },
+    accountNumber: { type: Number, },
+    bankName: { type: String, },
+    bankIdentifierCode: { type: Number, },
+    branch: { type: String, },
+    taxPayerId: { type: Number, },
 
     //HRM and Payroll
 

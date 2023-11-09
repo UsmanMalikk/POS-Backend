@@ -9,6 +9,7 @@ const Admin = require('../models/admin');
 const User = require('../models/addUser');
 const Pos = require('../models/addPos');
 const Supplier = require('../models/Supplier');
+const mongoose = require("mongoose");
 
 async function generateInvoiceNumber() {
     const invoice = await Invoice.findOne({ isDefault: true });
@@ -66,29 +67,6 @@ exports.createSale = async (req, res) => {
     // console.log(saleType)
     try {
         if (saleType === 'draft' || saleData.status === 'Draft') {
-            if (saleData.invoiceNumber === "") {
-                const generatedInvoiceNumber = await generateInvoiceNumber();
-                saleData.invoiceNumber = generatedInvoiceNumber;
-
-            }
-
-            const newDraft = await Draft.create(saleData);
-            // console.log(newSale)
-            res.status(201).json({ message: 'Draft added successfully', draft: newDraft });
-        }
-        else if (saleType === 'quotations' || saleData.status === 'Quotation') {
-
-            if (saleData.invoiceNumber === "") {
-                const generatedInvoiceNumber = await generateInvoiceNumber();
-                saleData.invoiceNumber = generatedInvoiceNumber;
-
-            }
-
-            const newQuotation = await Quotation.create(saleData);
-            // console.log(newSale)
-            res.status(201).json({ message: 'Quotation added successfully', quotation: newQuotation });
-        }
-        else {
             const adminUser = await Admin.findOne({ _id: saleData.deliveryPerson });
             let deliveryPersonAdmin = null;
             let deliveryPersonUser = null;
@@ -106,78 +84,154 @@ exports.createSale = async (req, res) => {
                 }
             }
 
-            if (saleData.paymentAccount) {
-                const paymentAccount = await Account.findOne({ _id: saleData.paymentAccount });
-
-                if (!paymentAccount) {
-                    return res.status(400).json({ message: 'Payment account not found' });
-                }
-
-                // Subtract the sale amount from the account's opening balance
-                paymentAccount.openingBalance = parseFloat(paymentAccount.openingBalance) + parseFloat(saleData.amount);
-
-                // Save the updated account back to the AddAccount schema
-                await paymentAccount.save();
-            }
-
-            if (saleData.amount < saleData.totalSaleAmount || saleData.paymentMethod === "") {
-           
-                const customerId = saleData.customer;
-    
-                // Find the supplier in the database
-                const customer = await Supplier.findOne({ _id: customerId });
-    
-                if (!customer) {
-                    return res.status(404).json({ message: 'customer not found' });
-                }
-    
-                // Increment the totalPurchaseDue for the supplier
-                customer.totalPurchaseDue = parseFloat(saleData.totalSaleAmount) + parseFloat(saleData.amount);
-    
-                // Save the updated supplier
-                await customer.save();
-            }
-
             if (saleData.invoiceNumber === "") {
                 const generatedInvoiceNumber = await generateInvoiceNumber();
                 saleData.invoiceNumber = generatedInvoiceNumber;
 
             }
 
-            // Add stock minus
+            const newDraft = await Draft.create(saleData);
+            // console.log(newSale)
+            res.status(201).json({ message: 'Draft added successfully', draft: newDraft });
+        }
+        else if (saleType === 'quotations' || saleData.status === 'Quotation') {
+            const adminUser = await Admin.findOne({ _id: saleData.deliveryPerson });
+            let deliveryPersonAdmin = null;
+            let deliveryPersonUser = null;
 
-            if (saleData.inputData && saleData.inputData.length > 0) {
-                for (const saleItem of saleData.inputData) {
-                    const product = await Product.findById(saleItem.product);
+            if (adminUser) {
+                // If the deliveryPerson is an Admin, assign it to deliveryPersonAdmin
+                deliveryPersonAdmin = saleData.deliveryPerson;
+            } else {
+                // If not, check in the AddUser schema
+                const addUser = await User.findOne({ _id: saleData.deliveryPerson });
 
-                    if (product) {
-                        if (product.totalQuantity >= saleItem.quantity) {
-                            // product.openingStock.quantityRemaining -= saleItem.quantity;
-                            product.totalQuantity = parseFloat(product.totalQuantity) - parseFloat(saleItem.quantity);
-
-                            await product.save();
-                        } else {
-                            return res.status(400).json({ message: 'Insufficient product quantity' });
-                        }
-                    } else {
-                        return res.status(404).json({ message: 'Product not found' });
-                    }
+                if (addUser) {
+                    // If the deliveryPerson is an AddUser, assign it to deliveryPersonUser
+                    deliveryPersonUser = saleData.deliveryPerson;
                 }
             }
+            if (saleData.invoiceNumber === "") {
+                const generatedInvoiceNumber = await generateInvoiceNumber();
+                saleData.invoiceNumber = generatedInvoiceNumber;
 
-            const newSale = await Sale.create({
-                ...saleData,
-                deliveryPersonAdmin,
-                deliveryPersonUser,
-            });
-    
-            res.status(201).json({ message: 'Sale added successfully', sale: newSale });
+            }
+
+            const newQuotation = await Quotation.create(saleData);
+            // console.log(newSale)
+            res.status(201).json({ message: 'Quotation added successfully', quotation: newQuotation });
         }
+        else {
+            const session = await mongoose.startSession();
+            session.startTransaction();
 
+
+            const adminUser = await Admin.findOne({ _id: saleData.deliveryPerson });
+            let deliveryPersonAdmin = null;
+            let deliveryPersonUser = null;
+
+            if (adminUser) {
+                // If the deliveryPerson is an Admin, assign it to deliveryPersonAdmin
+                deliveryPersonAdmin = saleData.deliveryPerson;
+            } else {
+                // If not, check in the AddUser schema
+                const addUser = await User.findOne({ _id: saleData.deliveryPerson });
+
+                if (addUser) {
+                    // If the deliveryPerson is an AddUser, assign it to deliveryPersonUser
+                    deliveryPersonUser = saleData.deliveryPerson;
+                }
+            }
+            try {
+
+                if (saleData.paymentAccount) {
+                    const paymentAccount = await Account.findOne({ _id: saleData.paymentAccount });
+
+                    if (!paymentAccount) {
+                        await session.abortTransaction();
+                        session.endSession();
+                        return res.status(400).json({ message: 'Payment account not found' });
+                    }
+
+                    // Subtract the sale amount from the account's opening balance
+                    paymentAccount.openingBalance = parseFloat(paymentAccount.openingBalance) + parseFloat(saleData.amount);
+
+                    // Save the updated account back to the AddAccount schema
+                    await paymentAccount.save();
+                }
+
+                if (saleData.amount < saleData.totalSaleAmount || saleData.paymentMethod === "") {
+
+                    const customerId = saleData.customer;
+
+                    // Find the supplier in the database
+                    const customer = await Supplier.findOne({ _id: customerId });
+
+                    if (!customer) {
+                        await session.abortTransaction();
+                        session.endSession();
+                        return res.status(404).json({ message: 'customer not found' });
+                    }
+
+                    // Increment the totalPurchaseDue for the supplier
+                    customer.totalPurchaseDue = parseFloat(saleData.totalSaleAmount) + parseFloat(saleData.amount);
+
+                    // Save the updated supplier
+                    await customer.save();
+                }
+
+                if (saleData.invoiceNumber === "") {
+                    const generatedInvoiceNumber = await generateInvoiceNumber();
+                    saleData.invoiceNumber = generatedInvoiceNumber;
+
+                }
+
+                // Add stock minus
+
+                if (saleData.inputData && saleData.inputData.length > 0) {
+                    for (const saleItem of saleData.inputData) {
+                        const product = await Product.findById(saleItem.product);
+
+                        if (product) {
+                            if (product.totalQuantity >= saleItem.quantity) {
+                                // product.openingStock.quantityRemaining -= saleItem.quantity;
+                                product.totalQuantity = parseFloat(product.totalQuantity) - parseFloat(saleItem.quantity);
+
+                                await product.save();
+                            } else {
+                                await session.abortTransaction();
+                                session.endSession();
+                                return res.status(400).json({ message: 'Insufficient product quantity' });
+                            }
+                        } else {
+                            await session.abortTransaction();
+                            session.endSession();
+                            return res.status(404).json({ message: 'Product not found' });
+                        }
+                    }
+                }
+
+                const newSale = await Sale.create({
+                    ...saleData,
+                    deliveryPersonAdmin,
+                    deliveryPersonUser,
+                });
+                // Commit the transaction
+                await session.commitTransaction();
+                session.endSession();
+                res.status(201).json({ message: 'Sale added successfully', sale: newSale });
+            } catch (error) {
+                // Handle specific errors and rollback the transaction
+                await session.abortTransaction();
+                session.endSession();
+                throw error; // Rethrow the error for a generic error response
+            }
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
     }
+
 };
 
 // Get a sale by ID
@@ -189,7 +243,7 @@ exports.getSaleById = async (req, res) => {
 
     try {
         if (saleType === 'draft') {
-            const draft = await Draft.findById(saleId);
+            const draft = await Draft.findById(saleId).populate('businesLocation', 'name').populate('customer', 'firstName prefix mobile addressLine1').populate('inputData.product', 'productName').populate('sellingPrice', 'name');
 
             if (!draft) {
                 return res.status(404).json({ message: 'Draft not found' });
@@ -199,7 +253,7 @@ exports.getSaleById = async (req, res) => {
         }
 
         else if (saleType === 'quotations') {
-            const quotation = await Quotation.findById(saleId);
+            const quotation = await Quotation.findById(saleId).populate('businesLocation', 'name').populate('customer', 'firstName prefix mobile addressLine1').populate('inputData.product', 'productName').populate('sellingPrice', 'name');
 
             if (!quotation) {
                 return res.status(404).json({ message: 'Quotation not found' });
@@ -209,7 +263,7 @@ exports.getSaleById = async (req, res) => {
         }
 
         else {
-            const sale = await Sale.findById(saleId).populate('customer', 'firstName prefix mobile addressLine1').populate('inputData.product', 'productName').populate('sellingPrice', 'name');
+            const sale = await Sale.findById(saleId).populate('businesLocation', 'name').populate('customer', 'firstName prefix mobile addressLine1').populate('inputData.product', 'productName').populate('sellingPrice', 'name');
 
             if (!sale) {
                 return res.status(404).json({ message: 'Sale not found' });
@@ -321,6 +375,39 @@ exports.saleShipment = async (req, res) => {
 
         const combinedShipments = [].concat(...shipments);
         res.status(200).json(combinedShipments);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+exports.getShipmentById = async (req, res) => {
+    const shipmentId = req.params.id; // Assuming the shipment ID is provided as a route parameter
+
+    try {
+        // First, try to find the shipment in the Sale schema
+        const saleShipment = await Sale.findOne({ _id: shipmentId })
+            .populate('customer', 'firstName mobile')
+            .populate('deliveryPersonUser', 'firstName')
+            .populate('businesLocation', 'name')
+            .populate('deliveryPersonAdmin', 'firstName');
+
+        if (saleShipment) {
+            return res.status(200).json(saleShipment);
+        }
+
+        // If not found in Sale, try to find it in the Pos schema
+        const posShipment = await Pos.findOne({ _id: shipmentId })
+            .populate('customer', 'firstName mobile')
+            .populate('deliveryPersonUser', 'firstName')
+            .populate('businesLocation', 'name')
+            .populate('deliveryPersonAdmin', 'firstName');
+
+        if (posShipment) {
+            return res.status(200).json(posShipment);
+        }
+
+        // If the shipment is not found in either schema, return an error
+        res.status(404).json({ message: 'Shipment not found' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });

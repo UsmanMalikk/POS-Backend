@@ -6,7 +6,7 @@ const unitSchema = new mongoose.Schema({
   allowDecimal: { type: String },
   multipleOfOtherUnits: { type: Boolean, default: false },
   timesBaseUnit: { type: Number },
-  baseUnit: { type: mongoose.Schema.Types.ObjectId, ref: 'Unit' }
+  baseUnit: { type: mongoose.Schema.Types.ObjectId, ref: 'Unit', default: null }
 
 });
 

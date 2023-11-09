@@ -2,40 +2,31 @@ const PurchasesDue = require('../models/PurchasesDue');
 const Account = require('../models/addAccount');
 const Product = require('../models/addProduct');
 const Supplier = require('../models/Supplier');
-const Prefix = require('../models/prefixes')
+const mongoose = require("mongoose");
 
 async function generatePurchaseId() {
-    // Find the prefix for contacts in the Prefix schema
-    const prefixDocument = await Prefix.findOne();
-    // console.log(prefixDocument)
-    let prefix = ""; // Initialize a variable to store the contacts prefix
-  
-    if (prefixDocument) {
-      prefix = prefixDocument.purchase;
-  
-    }
-  
+
     // Find the highest current number in the Supplier schema
     const highestPurchase = await PurchasesDue.findOne().sort({ referenceNo: -1 });
     // console.log(highestSupplier)
-  
-    if(!highestPurchase){
+
+    if (!highestPurchase) {
         highestPurchase.contact_id = 0
     }
     let currentNumber = 1; // Initialize to 1 if there are no existing suppliers
-  
+
     if (highestPurchase) {
-      currentNumber = parseFloat(highestPurchase.referenceNo) + parseFloat(1);
+        currentNumber = parseFloat(highestPurchase.referenceNo) + parseFloat(1);
     }
-  
-  
-  
+
+
+
     // Format the contact ID with the prefix and sequential number
     const formattedNumber = currentNumber.toString().padStart(4, '0'); // Adjust the padding length as needed
-  
-    return `${prefix}${formattedNumber}`;
-  }
-  
+
+    return `${formattedNumber}`;
+}
+
 
 
 const getAllPurchases = async (req, res) => {
@@ -123,19 +114,24 @@ const createNewPurchase = async (req, res) => {
     const purchaseData = req.body;
     // console.log(purchaseData)
     try {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
         if (!purchaseData.referenceNo) {
             // console.log("cf")
-      
+
             const generatedPurchaseId = await generatePurchaseId();
             purchaseData.referenceNo = generatedPurchaseId;
             // console.log(newContactData.contact_id)
-      
-          }
+
+        }
 
         if (purchaseData.paymentAccount) {
             const paymentAccount = await Account.findOne({ _id: purchaseData.paymentAccount });
 
             if (!paymentAccount) {
+                await session.abortTransaction();
+                session.endSession();
                 return res.status(400).json({ message: 'Payment account not found' });
             }
 
@@ -145,15 +141,17 @@ const createNewPurchase = async (req, res) => {
             // Save the updated account back to the AddAccount schema
             await paymentAccount.save();
         }
-        
+
         if (purchaseData.amount < purchaseData.totalPurchaseAmount || purchaseData.paymentMethod === "") {
-           
+
             const supplierId = purchaseData.supplier;
             // console.log(supplierId)
             // Find the supplier in the database
             const supplier = await Supplier.findOne({ _id: supplierId });
 
             if (!supplier) {
+                await session.abortTransaction();
+                session.endSession();
                 return res.status(404).json({ message: 'Supplier not found' });
             }
 
@@ -163,13 +161,7 @@ const createNewPurchase = async (req, res) => {
             // Save the updated supplier
             await supplier.save();
         }
-        // if (purchaseData.Reference === "") {
-        //     const generatedInvoiceNumber = await generateInvoiceNumber();
-        //     saleData.invoiceNumber = generatedInvoiceNumber;
 
-        // }
-
-        // Add stock minus
 
         if (purchaseData.inputData && purchaseData.inputData.length > 0) {
             for (const purchaseItem of purchaseData.inputData) {
@@ -188,22 +180,31 @@ const createNewPurchase = async (req, res) => {
                         // Save the product with the updated quantity
                         await product.save();
                     } else {
+                        await session.abortTransaction();
+                        session.endSession();
                         return res.status(404).json({ message: 'Product not found' });
                     }
                 } catch (err) {
+                    await session.abortTransaction();
+                    session.endSession();
                     console.error(err);
                     return res.status(500).json({ message: 'Internal Server Error' });
                 }
             }
             const newPurchase = await PurchasesDue.create(purchaseData);
-
+            await session.commitTransaction();
+            session.endSession();
             return res.status(201).json({ message: 'Purchase completed successfully', purchase: newPurchase });
         } else {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({ message: 'No purchase data provided' });
         }
 
     } catch (error) {
         console.error('Error creating customer group:', error);
+        await session.abortTransaction();
+        session.endSession();
         res.status(500).json({ error: 'Internal Server Error' });
     }
 
@@ -256,7 +257,7 @@ const getByIdPurchase = async (req, res) => {
     const purchaseId = req.params.id;
 
     try {
-        const purchase = await PurchasesDue.findById(purchaseId).populate('businessLocation','name').populate('supplier','firstName');
+        const purchase = await PurchasesDue.findById(purchaseId).populate('businessLocation', 'name').populate('supplier', 'firstName prefix');
 
         if (!purchase) {
             return res.status(404).json({ message: 'Purchase not found' });
@@ -269,4 +270,4 @@ const getByIdPurchase = async (req, res) => {
 };
 
 
-module.exports = { getAllPurchases, createNewPurchase, updatePurchase, deletePurchaseById , getByIdPurchase};
+module.exports = { getAllPurchases, createNewPurchase, updatePurchase, deletePurchaseById, getByIdPurchase };

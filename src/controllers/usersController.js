@@ -40,18 +40,25 @@ exports.updateUser = async (req, res) => {
     const userData = req.body;
 
     try {
-        // Try to update the user in the User schema
-        let updatedUser = await User.findByIdAndUpdate(userId, userData);
+        // First, find the user by ID
+        const user = await User.findById(userId);
 
-        if (!updatedUser) {
-            // If not found in the User schema, try updating in the Admin schema
-            updatedUser = await Admin.findByIdAndUpdate(userId, userData);
+        if (!user) {
+            // If the user is not found in the User schema, try finding in the Admin schema
+            const admin = await Admin.findById(userId);
 
-            if (!updatedUser) {
+            if (!admin) {
                 return res.status(404).json({ message: 'User or Admin not found' });
+            } else {
+                // If found in the Admin schema, update the entire admin data
+                admin.set(userData);
+                await admin.save();
             }
+        } else {
+            // If found in the User schema, update the entire user data
+            user.set(userData);
+            await user.save();
         }
-
         res.status(200).json({ message: 'User or Admin updated successfully' });
     } catch (error) {
         console.error(error);
@@ -78,7 +85,7 @@ exports.getUserById = async (req, res) => {
 
     try {
         // Try to find the user in the User schema
-        let user = await User.findById(userId).populate('role', 'roleName');
+        let user = await User.findById(userId);
 
         if (!user) {
             // If not found in the User schema, try finding in the Admin schema
@@ -124,34 +131,34 @@ exports.getUserProfileById = async (req, res) => {
 exports.updateUserProfileById = async (req, res) => {
     const userId = req.user.userId;
     const userData = req.body;
-  
+
     try {
-      // First, find the user by ID
-      const user = await User.findById(userId);
-  
-      if (!user) {
-        // If the user is not found in the User schema, try finding in the Admin schema
-        const admin = await Admin.findById(userId);
-  
-        if (!admin) {
-          return res.status(404).json({ message: 'User or Admin not found' });
+        // First, find the user by ID
+        const user = await User.findById(userId);
+
+        if (!user) {
+            // If the user is not found in the User schema, try finding in the Admin schema
+            const admin = await Admin.findById(userId);
+
+            if (!admin) {
+                return res.status(404).json({ message: 'User or Admin not found' });
+            } else {
+                // If found in the Admin schema, update the entire admin data
+                admin.set(userData);
+                await admin.save();
+            }
         } else {
-          // If found in the Admin schema, update the entire admin data
-          admin.set(userData);
-          await admin.save();
+            // If found in the User schema, update the entire user data
+            user.set(userData);
+            await user.save();
         }
-      } else {
-        // If found in the User schema, update the entire user data
-        user.set(userData);
-        await user.save();
-      }
-  
-      res.status(200).json({ message: 'User or Admin updated successfully' });
+
+        res.status(200).json({ message: 'User or Admin updated successfully' });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Internal server error' });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
     }
-  };
+};
 
 // Update a userProfile
 exports.updateUserProfilePassword = async (req, res) => {
@@ -180,7 +187,7 @@ exports.updateUserProfilePassword = async (req, res) => {
 
                 // Update the password
                 admin.password = password;
-                admin.cpassword = cPassword;
+                admin.cPassword = cPassword;
                 await admin.save();
 
                 res.status(200).json({ message: 'Password changed successfully' });

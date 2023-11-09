@@ -4,15 +4,6 @@ const StockTransfer = require('../models/addStocktransfer');
 const Prefix = require('../models/prefixes')
 
 async function generateStockTransferId() {
-    // Find the prefix for contacts in the Prefix schema
-    const prefixDocument = await Prefix.findOne();
-    // console.log(prefixDocument)
-    let prefix = ""; // Initialize a variable to store the contacts prefix
-  
-    if (prefixDocument) {
-      prefix = prefixDocument.stockTransfer;
-  
-    }
   
     // Find the highest current number in the Supplier schema
     const highestNo = await StockTransfer.findOne().sort({ referenceNumber: -1 });
@@ -32,7 +23,7 @@ async function generateStockTransferId() {
     // Format the contact ID with the prefix and sequential number
     const formattedNumber = currentNumber.toString().padStart(4, '0'); // Adjust the padding length as needed
   
-    return `${prefix}${formattedNumber}`;
+    return `${formattedNumber}`;
   }
 // Controller for POST /stock-transfers
 exports.createStockTransfer = async (req, res) => {

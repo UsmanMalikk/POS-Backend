@@ -1,83 +1,65 @@
 const ContactCustomLabel = require('../models/contactCustomLabel');
 exports.createContactCustomLabel = async (req, res) => {
-    const customContactLabels = req.body; // Access the customContactLabels array directly
+    const customContactLabels = req.body;
 
-    try {
-        const createdContactCustomLabels = [];
+  try {
+    const createdContactCustomLabels = {};
 
-        for (let i = 0; i < customContactLabels.length; i++) {
-            const customContactLabel = customContactLabels[i].customLable; // Access the customLabel within each object
-            if (customContactLabel !== "") {
-                const customLabel = new ContactCustomLabel({
-                    customFieldNumber: i + 1, // Assuming customFieldNumber is 1-based
-                    customLable: customContactLabel,
-                });
+    for (let i = 1; i <= 10; i++) {
+      const customLable = customContactLabels[`customLable${i}`];
 
-                // Save the customLabel
-                const savedCustomLabel = await customLabel.save();
-
-                createdContactCustomLabels.push(savedCustomLabel);
-            }
-        }
-
-        res.status(201).json({ createdContactCustomLabels });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+      createdContactCustomLabels[`customLable${i}`] = customLable || '';
     }
+
+    const contactCustomLabel = new ContactCustomLabel(createdContactCustomLabels);
+
+    // Save the contactCustomLabel document
+    const savedContactCustomLabel = await contactCustomLabel.save();
+
+    res.status(201).json(savedContactCustomLabel);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 }
 
 
-// exports.updateContactCustomLabel = async (req, res) => {
-//     const { id } = req.params; // Extract the ID from the request parameters
-//     const { customLabel } = req.body;
+exports.updateContactCustomLabel = async (req, res) => {
+    const updatedData = req.body;
 
-//     try {
-//         if (!id || !customLabel) {
-//             return res.status(400).json({ message: 'Both ID and customLabel are required' });
-//         }
-
-//         // Find the ContactCustomLabel by ID
-//         const existingContactCustomLabel = await ContactCustomLabel.findById(id);
-
-//         if (!existingContactCustomLabel) {
-//             return res.status(404).json({ message: 'ContactCustomLabel not found' });
-//         }
-
-//         // Update the customLabel
-//         existingContactCustomLabel.customLable = customLabel;
-
-//         // Save the updated ContactCustomLabel
-//         const updatedContactCustomLabel = await existingContactCustomLabel.save();
-
-//         res.status(200).json(updatedContactCustomLabel);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Server error' });
-//     }
-// };
-exports.getAllContactCustomLabels = async (req, res) => {
     try {
-        const contactCustomLabels = await ContactCustomLabel.find();
-        res.status(200).json(contactCustomLabels);
+        let contactCustomLabels = await ContactCustomLabel.findOne({});
+        if (contactCustomLabels === null) {
+            contactCustomLabels = new ContactCustomLabel();
+        }
+        for (let i = 1; i <= 10; i++) {
+            if (updatedData[`customLable${i}`] !== undefined) {
+                contactCustomLabels[`customLable${i}`] = updatedData[`customLable${i}`];
+            }
+        }
+
+        await contactCustomLabels.save();
+
+        res.status(200).json({ message: 'ContactCustom Labels updated successfully' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
 };
-// exports.getContactCustomLabelById = async (req, res) => {
-//     const { id } = req.params;
+exports.getAllContactCustomLabels = async (req, res) => {
+    try {
+        const contactCustomLabels = await ContactCustomLabel.findOne({}); // Assuming there is only one document
 
-//     try {
-//         const contactCustomLabel = await ContactCustomLabel.findById(id);
+        // Initialize an object to store the response data
+        const response = {};
 
-//         if (!contactCustomLabel) {
-//             return res.status(404).json({ message: 'ContactCustomLabel not found' });
-//         }
+        for (let i = 1; i <= 10; i++) {
+            response[`customLable${i}`] = contactCustomLabels[`customLable${i}`];
+        }
 
-//         res.status(200).json(contactCustomLabel);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Server error' });
-//     }
-// };
+        res.status(200).json(response);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

@@ -12,14 +12,18 @@ const { getAllContacts, createSupplierContact, updateSupplierContact,
     deleteCustomerContact,
     getCustomerContactById,
     deleteAllCustomerContacts,
-    exportContacts
-
-    
+    exportContacts,
+    getAllSupCust,
+    getContactsWithSaleDue,
+    getContactWithPurchaseDue
 
 
 
 } = require("../controllers/Contact")
 
+router.get('/contacts', getAllSupCust);
+router.get('/contacts/customer/dues', getContactsWithSaleDue);
+router.get('/contacts/supplier/dues', getContactWithPurchaseDue);
 
 router.get('/contacts/:type', getAllContacts);
 
@@ -32,8 +36,8 @@ router.get('/contacts/:type/:id', getSupplierContactById);
 router.delete('/contacts/supplier', deleteAllSupplierContacts);
 /// customer route
 router.post('/contacts/customer', createCustomerContact);
-router.put('/contacts/customer/:id',updateCustomerContact);
-router.delete('/contacts/customer/:id',deleteCustomerContact);
+router.put('/contacts/customer/:id', updateCustomerContact);
+router.delete('/contacts/customer/:id', deleteCustomerContact);
 router.get('/contacts/customer/:id', getCustomerContactById);
 router.delete('/contacts/customer', deleteAllCustomerContacts);
 

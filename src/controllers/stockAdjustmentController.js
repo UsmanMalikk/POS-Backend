@@ -4,16 +4,7 @@ const StockAdjustment = require('../models/addStockadjustment');
 const Prefix = require('../models/prefixes')
 
 async function generateStockAdjustmentId() {
-    // Find the prefix for contacts in the Prefix schema
-    const prefixDocument = await Prefix.findOne();
-    // console.log(prefixDocument)
-    let prefix = ""; // Initialize a variable to store the contacts prefix
-  
-    if (prefixDocument) {
-      prefix = prefixDocument.stockAdjustment;
-  
-    }
-  
+   
     // Find the highest current number in the Supplier schema
     const highestNo = await StockAdjustment.findOne().sort({ referenceNumber: -1 });
     // console.log(highestSupplier)
@@ -32,7 +23,7 @@ async function generateStockAdjustmentId() {
     // Format the contact ID with the prefix and sequential number
     const formattedNumber = currentNumber.toString().padStart(4, '0'); // Adjust the padding length as needed
   
-    return `${prefix}${formattedNumber}`;
+    return `${formattedNumber}`;
   }
   
 // Controller for POST /stock-adjustment

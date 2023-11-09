@@ -13,21 +13,12 @@ const Supplier = require('../models/Supplier');
 
 
 async function generateContactId() {
-  // Find the prefix for contacts in the Prefix schema
-  const prefixDocument = await Prefix.findOne();
-  // console.log(prefixDocument)
-  let prefix = ""; // Initialize a variable to store the contacts prefix
-
-  if (prefixDocument) {
-    prefix = prefixDocument.contacts;
-
-  }
 
   // Find the highest current number in the Supplier schema
   const highestSupplier = await Supplier.findOne().sort({ contact_id: -1 });
   // console.log(highestSupplier)
 
-  if(!highestSupplier){
+  if (!highestSupplier) {
     highestSupplier.contact_id = 0
   }
   let currentNumber = 1; // Initialize to 1 if there are no existing suppliers
@@ -41,7 +32,7 @@ async function generateContactId() {
   // Format the contact ID with the prefix and sequential number
   const formattedNumber = currentNumber.toString().padStart(4, '0'); // Adjust the padding length as needed
 
-  return `${prefix}${formattedNumber}`;
+  return `${formattedNumber}`;
 }
 
 
@@ -221,11 +212,11 @@ const updateSupplierContact = async (req, res) => {
     const updatedContactData = req.body;
     const updatedSupplierContact = await Contact.findByIdAndUpdate(
       contactId,
-      { ...updatedContactData },
+      updatedContactData ,
       { new: true }
     );
     if (updatedSupplierContact) {
-      res.json(updatedSupplierContact);
+      res.status(200).json(updatedSupplierContact);
     } else {
       res.status(404).json({ error: 'Supplier Contact not found' });
     }
@@ -317,11 +308,11 @@ const updateCustomerContact = async (req, res) => {
     const updatedContactData = req.body;
     const updateCustomerContact = await Contact.findByIdAndUpdate(
       contactId,
-      { ...updatedContactData },
+      updatedContactData,
       { new: true }
     );
     if (updateCustomerContact) {
-      res.json(updateCustomerContact);
+      res.status(200).json(updateCustomerContact);
     } else {
       res.status(404).json('Customer contact not found');
     }
@@ -380,8 +371,36 @@ const deleteAllCustomerContacts = async (req, res) => {
   }
 };
 
+const getAllSupCust = async (req, res) => {
 
 
+  try {
+    const custSup = await Contact.find();
+    res.status(200).json(custSup);
+  } catch (error) {
+    console.error('Error fetching customer groups:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const getContactsWithSaleDue = async (req, res) => {
+  try {
+    const suppliers = await Supplier.find({ totalSaleDue: { $gt: 0 } });
+    res.status(200).json(suppliers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+const getContactWithPurchaseDue = async (req, res) => {
+  try {
+    const suppliers = await Supplier.find({ totalPurchaseDue: { $gt: 0 } });
+    res.status(200).json(suppliers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 module.exports = {
   getAllContacts, createSupplierContact, updateSupplierContact,
   deleteSupplierContact,
@@ -391,6 +410,8 @@ module.exports = {
   updateCustomerContact,
   deleteCustomerContact,
   getCustomerContactById,
-  deleteAllCustomerContacts, exportContacts
-
+  deleteAllCustomerContacts, exportContacts,
+  getAllSupCust,
+  getContactsWithSaleDue,
+  getContactWithPurchaseDue
 };

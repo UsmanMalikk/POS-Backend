@@ -2,13 +2,11 @@ const mongoose = require('mongoose');
 
 const draftSchema = new mongoose.Schema({
     businesLocation: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null },
-    sellingPrice: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    sellingPrice: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
     typeofService: { type: String },
-    // customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
-    customer: { type:String },
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier', default: null },
 
-    //billing add
-    //shipping add
+   
     payTerm: { type: String },
     salesDate: { type: Date, default: Date.now },
     status: { type: String, required: true },
@@ -17,14 +15,9 @@ const draftSchema = new mongoose.Schema({
 
 
 
-    // orderStatus:{type: String, default: "Received"},  was for kitchen tab
-    //Attach doc
-    //select table
-    //select service staff
-
     inputData: [
         {
-            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
             quantity: { type: Number, default: 0 },
             unitPrice: { type: Number, default: 0.00 },
             discount: { type: Number, default: 0.00 },
@@ -34,18 +27,14 @@ const draftSchema = new mongoose.Schema({
         totalSaleAmount:{ type: Number },
         byPos: { type: Boolean },
 
-    // total:unitPrice*quantity,
-    // percent: (discount/100)*total,
-    // subTotal: total-percent,
 
     discountType: { type: String },
     discountAmount: { type: Number },
 
-    //Redeemed
+    deliveryPersonUser: { type: mongoose.Schema.Types.ObjectId, ref: 'AddUser', default:null },
+    deliveryPersonAdmin: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default:null },
 
-
-    orderTaxType: { type: String },
-    orderTax: { type: Number },
+   
     sellNote: { type: String },
 
     shippingDetails: { type: String },
@@ -63,16 +52,6 @@ const draftSchema = new mongoose.Schema({
     additionalExpenseAmount2: { type: Number },
     additionalExpenseName3: { type: String },
     additionalExpenseAmount3: { type: Number },
-    //shippingDocs
-
-
-    amount: { type: Number },
-    paymentDate: { type: Date, default: Date.now },
-    paymentMethod: { type: String },
-    // paymentAccount: { type: mongoose.Schema.Types.ObjectId, ref: 'PaymentAccount' },
-    paymentNote: { type: String },
-
-
 
 
 });

@@ -8,8 +8,7 @@ const customerGroupSchema = new Schema({
     },
     calculationType: {
         type: String,
-        enum: ['Percentage', 'Selling Price Group'],
-        required: true
+       
     },
     calculationPercentage: {
         type: Number,

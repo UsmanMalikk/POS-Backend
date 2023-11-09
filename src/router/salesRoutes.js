@@ -8,6 +8,8 @@ const authMiddleware = require('../middleware/authMiddleware');
 //GET Sales Shipment Status
 router.get('/shipments',authMiddleware, checkPermission('accessAllShipments'), salesController.saleShipment);
 
+router.get('/shipments/:id',authMiddleware, checkPermission('accessAllShipments'), salesController.getShipmentById);
+
 // GET /sales/all-records
 router.get('/:type', authMiddleware,checkPermission('viewAllSell'), salesController.getAllSales);
 

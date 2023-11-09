@@ -9,8 +9,7 @@ const authMiddleware=require('../middleware/authMiddleware');
 router.post('/',contactCustomLabelController.createContactCustomLabel);
 router.get('/',contactCustomLabelController.getAllContactCustomLabels);
 
-// router.get('/:id', contactCustomLabelController.getContactCustomLabelById);
 
-// router.put('/:id', contactCustomLabelController.updateContactCustomLabel);
+router.put('/', contactCustomLabelController.updateContactCustomLabel);
 
 module.exports=router;

@@ -4,7 +4,7 @@ const AccountSchema = new mongoose.Schema({
   name: { type: String, required: true },
   accountNumber: { type: String, required: true },
   accountType: { type: mongoose.Schema.Types.ObjectId, ref: 'AccountType' },
-  openingBalance: { type: Number, required: true },
+  openingBalance: { type: Number, default:0 },
   accountDetails: [
     {
       label: { type: String },

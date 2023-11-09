@@ -4,9 +4,9 @@ const adminSchema = new mongoose.Schema({
     
     // businessName: { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessLocation', default: null, required: true },
 
-    businessName: { type: String, required: true },
-    startDate: { type: Date, required: true, default: Date.now},
-    currency: { type: String, required: true },
+    businessName: { type: String },
+    startDate: { type: Date, default: Date.now},
+    currency: { type: String },
     logo: { type: String },
     website: { type: String },
     contactNumber: { type: Number },
@@ -24,16 +24,16 @@ const adminSchema = new mongoose.Schema({
     tax2Name: { type: String },
     tax2No: { type: Number },
     financialYearStartMonth: { type: String },
-    stockAccountingMethod: { type: String, enum: ['FIFO', 'LIFO'] },
+    stockAccountingMethod: { type: String },
 
 
     prefix: { type: String },
     firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    userName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    lastName: { type: String },
+    userName: { type: String , required: true},
+    email: { type: String, unique: true },
     password: { type: String, required: true },
-    cpassword: { type: String, required: true },
+    cPassword: { type: String, required: true },
 
     role: { type: String, default: "Admin" }, // Reference to the Role collection
 
