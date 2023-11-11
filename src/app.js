@@ -55,7 +55,7 @@ const productCustomLabelRoutes = require('./router/productCustomLabelRoutes');
 const purchaseCustomLabelRoutes = require('./router/purchaseCustomLabelRoutes');
 const systemColorRoutes = require('./router/systemColorRoutes');
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
