@@ -54,6 +54,7 @@ const contactCustomLabelRoutes = require('./router/contactCustomLabelRoutes');
 const productCustomLabelRoutes = require('./router/productCustomLabelRoutes');
 const purchaseCustomLabelRoutes = require('./router/purchaseCustomLabelRoutes');
 const systemColorRoutes = require('./router/systemColorRoutes');
+const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
@@ -111,6 +112,6 @@ app.use('/admin/business-locations', businessLocationRoutes);
 // app.use('/admin/reports', reportRoute);
 app.use('/admin/system-color', systemColorRoutes);
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
