@@ -24,8 +24,13 @@ exports.getAllUsers = async (req, res) => {
 // Create a new user
 exports.createUser = async (req, res) => {
     const userData = req.body;
+    const { password, cPassword } = userData;
 
     try {
+        if (password !== cPassword) {
+            return res.status(400).json({ message: 'Password and confirmed Password do not match' });
+        }
+
         const newUser = await User.create(userData);
         res.status(201).json({ message: 'User created successfully', user: newUser });
     } catch (error) {
